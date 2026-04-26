@@ -768,7 +768,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const source = $('Parse Chapter 1 Scene Cards').item.json;\nconst promptTemplate = $json.content;\nconst scenes = source.scene_cards.scenes || [];\nconst styleRules = [\n  source.style_preference || '',\n  '每个场景控制在 800-1200 个中文字符。',\n  '不要提前写后续场景。',\n  '保留都市轻喜剧、身份错位、职场反差和底层智慧的爽点。',\n  '主角不能突然变成天生霸总，商业判断必须来自一线经验。'\n].filter(Boolean).join('\\n');\nreturn scenes.map((scene, index) => {\n  const sceneIndex = Number(scene.scene_index || index + 1);\n  const sceneNo = String(sceneIndex).padStart(2, '0');\n  const payload = {\n    story_bible: source.story_bible_markdown,\n    chapter_task: source.chapter_task,\n    scene_card: scene,\n    recent_context: index === 0 ? [] : scenes.slice(0, index).map(s => ({ scene_index: s.scene_index, next_bridge: s.next_bridge })),\n    style_rules: styleRules\n  };\n  const prompt = `${promptTemplate}\n\n请扩写第 ${source.chapter_index} 章第 ${sceneIndex} 场。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n要求：\n1. 只输出 Markdown 正文片段，不要输出 JSON。\n2. 不要用代码块包裹。\n3. 不要写章节标题，只写本场景正文。`;\n  return { json: { ...source, scene_card: scene, scene_index: sceneIndex, scene_path: `scenes/ch001_scene${sceneNo}.md`, prompt } };\n});"
+        "jsCode": "const source = $('Parse Chapter 1 Scene Cards').item.json;\nconst promptTemplate = $json.content;\nconst scenes = source.scene_cards.scenes || [];\nconst styleRules = [\n  source.style_preference || '',\n  '每个场景控制在 600-900 个中文字符。',\n  '不要提前写后续场景。',\n  '保留都市轻喜剧、身份错位、职场反差和底层智慧的爽点。',\n  '主角不能突然变成天生霸总，商业判断必须来自一线经验。'\n].filter(Boolean).join('\\n');\nreturn scenes.map((scene, index) => {\n  const sceneIndex = Number(scene.scene_index || index + 1);\n  const sceneNo = String(sceneIndex).padStart(2, '0');\n  const payload = {\n    story_bible: source.story_bible_markdown,\n    chapter_task: source.chapter_task,\n    scene_card: scene,\n    recent_context: index === 0 ? [] : scenes.slice(0, index).map(s => ({ scene_index: s.scene_index, next_bridge: s.next_bridge })),\n    style_rules: styleRules\n  };\n  const prompt = `${promptTemplate}\n\n请扩写第 ${source.chapter_index} 章第 ${sceneIndex} 场。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n要求：\n1. 只输出 Markdown 正文片段，不要输出 JSON。\n2. 不要用代码块包裹。\n3. 不要写章节标题，只写本场景正文。`;\n  return { json: { ...source, scene_card: scene, scene_index: sceneIndex, scene_path: `scenes/ch001_scene${sceneNo}.md`, prompt } };\n});"
       },
       "id": "build_scene_draft_requests",
       "name": "Build Scene Draft Requests",
@@ -800,7 +800,13 @@
         "specifyBody": "json",
         "jsonBody": "={{ { model: $json.openai_model || $env.WRITER_MODEL || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.65, messages: [ { role: 'system', content: '你是中文类型小说主笔。请按场景卡输出自然的 Markdown 小说正文片段。' }, { role: 'user', content: $json.prompt } ] } }}",
         "options": {
-          "timeout": 300000
+          "timeout": 300000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 90000
+            }
+          }
         }
       },
       "id": "openai_scene_writer",
