@@ -16,7 +16,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "novel-seed-bridge-gpt",
-        "responseMode": "onReceived",
+        "responseMode": "lastNode",
         "options": {}
       },
       "id": "webhook_trigger",
