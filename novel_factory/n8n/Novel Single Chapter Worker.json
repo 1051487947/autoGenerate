@@ -104,7 +104,10 @@
       "position": [
         1184,
         160
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 60000
     },
     {
       "parameters": {
@@ -240,7 +243,10 @@
       "position": [
         2720,
         160
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 60000
     },
     {
       "parameters": {
@@ -359,7 +365,10 @@
       "position": [
         4000,
         160
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 120000
     },
     {
       "parameters": {
@@ -485,7 +494,10 @@
       "position": [
         5536,
         160
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 60000
     },
     {
       "parameters": {
@@ -621,7 +633,10 @@
       "position": [
         7072,
         160
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 60000
     },
     {
       "parameters": {
@@ -757,7 +772,10 @@
       "position": [
         8608,
         160
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 60000
     },
     {
       "parameters": {
