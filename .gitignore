@@ -20,6 +20,8 @@ node_modules/
 # Logs and transient browser output
 *.log
 .playwright-mcp/
+%SystemDrive%/
+NVIDIA Corporation/
 
 # Large raw generation traces can be kept local unless explicitly needed
 novel_projects/**/runs/

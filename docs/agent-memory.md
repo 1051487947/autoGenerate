@@ -232,4 +232,4 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `novel_factory/`
   - `novel_projects/`
 - 已新增根目录 `README.md`，说明仓库用途、目录结构、初始化新书命令和 N8N Bridge 启动命令。
-- 已新增 `.gitignore`，排除密钥、环境文件、Python 缓存、N8N 本地噪声、日志、Playwright 临时文件和 `novel_projects/**/runs/` 原始运行日志。
+- 已新增 `.gitignore`，排除密钥、环境文件、Python 缓存、N8N 本地噪声、日志、Playwright 临时文件、`%SystemDrive%/`、`NVIDIA Corporation/` 环境噪声目录和 `novel_projects/**/runs/` 原始运行日志。
