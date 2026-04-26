@@ -514,3 +514,68 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 主流程已经稳定验证到 3 章连续循环，不是只跑第 1 章。
   - 当前执行速度大约 10 分钟/章，完整 20 章预计约 3 小时上下，主要瓶颈是模型长文本生成。
   - QA 仍然偏保守：89-92 分且无重大冲突时仍标记 `needs_rewrite=true`，后续应优先做 `needs_polish` 和自动精修闭环。
+
+## 2026-04-27 完整 20 章原稿生成验证
+
+- 在 3 章验证成功后，已启动完整 20 章生成。
+- 第一次完整 20 章尝试：
+  - 测试书 ID：`full20_draft_20260426_230549`。
+  - 结果：失败。
+  - 失败节点：`OpenAI Scene Writer`，第 1 章第 4 个场景。
+  - 错误：`502 Bad gateway`，`Upstream stream ended without a terminal response event`。
+  - 判断：模型网关/上游流式响应中断，不是章节循环逻辑错误。
+- 已修复稳定性：
+  - 给 `Novel Single Chapter Worker` 中所有 OpenAI HTTP 节点添加 n8n 原生重试：
+    - `retryOnFail=true`
+    - `maxTries=3`
+    - 普通模型节点 `waitBetweenTries=60000`
+    - `OpenAI Scene Writer` 为 `waitBetweenTries=120000`
+  - 给 `Novel Book Loop MVP` 中书籍级 OpenAI 节点也添加同样重试。
+  - 已提交并推送：`9f3761f add retries to novel model requests`。
+  - 已部署到服务器 N8N SQLite：
+    - `novel_single_chapter_worker`
+    - `novel_book_loop_mvp`
+- 第二次完整 20 章生成：
+  - 测试书 ID：`full20_retry_20260426_232722`。
+  - 主执行：`27`，`novel_book_loop_mvp`，success。
+  - 子执行：`28` 至 `47`，20 个单章 Worker 全部 success。
+  - 总耗时：约 3 小时 16 分钟，从 `2026-04-26 23:27` 到 `2026-04-27 02:43`（北京时间）。
+- 已生成并同步到本地：
+  - `novel_projects/full20_retry_20260426_232722/chapters/ch001.md` 至 `ch020.md`
+  - `review/ch001.qa.json` 至 `ch020.qa.json`
+  - `memory/ch001.memory.json` 至 `ch020.memory.json`
+  - `chapter_tasks/ch001.task.json` 至 `ch020.task.json`
+  - `scenes/ch001.scenes.json` 至 `ch020.scenes.json`
+  - `export/full_book.md`
+- 合订本：
+  - 初始 `export/full_book.md` 只是占位文件，后已用 Python 重新按 UTF-8 合并 20 章。
+  - 文件：`novel_projects/full20_retry_20260426_232722/export/full_book.md`
+  - 大小约 300KB，约 10.4 万中文字符。
+- 章节标题：
+  - 第 1 章：`骑手被请进董事会`
+  - 第 2 章：`临时董事长，工服没换`
+  - 第 3 章：`第一场会，没人说人话`
+  - 第 4 章：`报表说稳定，仓库在冒烟`
+  - 第 5 章：`一张调度单，撕开第一道口子`
+  - 第 6 章：`站点炸了，没人肯再赔`
+  - 第 7 章：`董事长下场抢单`
+  - 第 8 章：`赵姐不听战略，只问今天送不送得到`
+  - 第 9 章：`先救午高峰，再谈明天`
+  - 第 10 章：`热搜比单量跑得更快`
+  - 第 11 章：`系统没疯，是有人让它疯`
+  - 第 12 章：`谁都说为大局，赔钱的是底下人`
+  - 第 13 章：`高价挖人，挖的是信心`
+  - 第 14 章：`名单是怎么漏出去的`
+  - 第 15 章：`先卸他的椅子`
+  - 第 16 章：`锅已经扣下来，人得先救出来`
+  - 第 17 章：`顺着一条日志，摸到一只手`
+  - 第 18 章：`他抢人，我抢真相`
+  - 第 19 章：`董事会上，把单号一笔一笔摊开`
+  - 第 20 章：`这公司，我先不让它倒`
+- QA 概况：
+  - 20 章均 `major_conflict=false`。
+  - 总分范围大致为 `89-92`。
+  - QA 仍偏保守，多章高分但仍标记 `needs_rewrite=true` 或 `needs_manual_review=true`。
+- 当前结论：
+  - 标题 -> 20 章大纲 -> 逐章任务单 -> 场景卡 -> 场景正文 -> 合章 -> QA -> 记忆回写 -> 合订本的完整原稿闭环已经跑通。
+  - 下一阶段重点应从“能不能生成 20 章”转为“如何自动精修和定稿”。
