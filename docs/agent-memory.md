@@ -480,3 +480,37 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 增加 QA 归一化规则：例如 `total_score >= 85` 且 `major_conflict=false` 时，`needs_rewrite` 视为 `needs_polish`。
   - 增加 `chapter_revision` 节点：根据 `rewrite_instruction` 生成 `chapters/chXXX.revised.md`，保留原稿。
   - 再跑 `start_chapter=1,end_chapter=3` 或直接低速跑 20 章，验证长期状态回写是否稳定。
+
+## 2026-04-26 3 章连续循环验证
+
+- 用户确认继续后，已触发 `Novel Book Loop MVP` 的 1-3 章连续验证。
+- 测试书 ID：`loop_worker_3ch_20260426_223237`。
+- 请求参数：
+  - `start_chapter=1`
+  - `end_chapter=3`
+  - `max_chapters_per_run=3`
+  - 标题：`我要送快递可是你非要我做董事长`
+- N8N 执行结果：
+  - 主流程执行：`21`，`novel_book_loop_mvp`，success。
+  - 第 1 章 Worker：`22`，success。
+  - 第 2 章 Worker：`23`，success。
+  - 第 3 章 Worker：`24`，success。
+- 已生成正文：
+  - `chapters/ch001.md`，标题：`# 第1章 董事长的工牌挂在快递员脖子上`，约 4515 字符。
+  - `chapters/ch002.md`，标题：`# 第2章 第一场会，谁也别跟我讲黑话`，约 4972 字符。
+  - `chapters/ch003.md`，标题：`# 第3章 讨薪的人比报表诚实`，约 5434 字符。
+- 每章均已生成对应产物：
+  - `chapter_tasks/ch00X.task.json`
+  - `scenes/ch00X.scenes.json`
+  - `scenes/ch00X_sceneYY.md`
+  - `chapters/ch00X.md`
+  - `review/ch00X.qa.json`
+  - `memory/ch00X.memory.json`
+- QA 概况：
+  - 第 1 章：`total_score=89`，`major_conflict=false`，`needs_rewrite=true`，`needs_manual_review=true`。
+  - 第 2 章：`total_score=91`，`major_conflict=false`，`needs_rewrite=true`，`needs_manual_review=false`。
+  - 第 3 章：`total_score=92`，`major_conflict=false`，`needs_rewrite=true`，`needs_manual_review=false`。
+- 结论：
+  - 主流程已经稳定验证到 3 章连续循环，不是只跑第 1 章。
+  - 当前执行速度大约 10 分钟/章，完整 20 章预计约 3 小时上下，主要瓶颈是模型长文本生成。
+  - QA 仍然偏保守：89-92 分且无重大冲突时仍标记 `needs_rewrite=true`，后续应优先做 `needs_polish` 和自动精修闭环。
