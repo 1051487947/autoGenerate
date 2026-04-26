@@ -454,14 +454,282 @@
     },
     {
       "parameters": {
-        "jsCode": "const seed = $('Parse Story Seed').item.json;\nreturn [{ json: {\n  ok: true,\n  book_id: seed.book_id,\n  title: seed.title,\n  saved_paths: ['bible/story_seed.json', 'bible/story_bible.md', 'outline/chapters_20.json'],\n  next_step: '生成第 1 章任务单和场景卡'\n} }];"
+        "jsCode": "const seed = $('Parse Story Seed').item.json;\nconst chapterTask = $('Parse Chapter 1 Task').item.json.chapter_task;\nconst sceneCards = $('Parse Chapter 1 Scene Cards').item.json.scene_cards;\nreturn [{ json: {\n  ok: true,\n  book_id: seed.book_id,\n  title: seed.title,\n  saved_paths: [\n    'bible/story_seed.json',\n    'bible/story_bible.md',\n    'outline/chapters_20.json',\n    'chapter_tasks/ch001.task.json',\n    'scenes/ch001.scenes.json'\n  ],\n  chapter_1: {\n    title: chapterTask.chapter_title,\n    scene_count: sceneCards.scenes.length\n  },\n  next_step: '生成第 1 章正文场景并合并为 chapters/ch001.md'\n} }];"
       },
       "id": "done",
       "name": "Done",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
+        8352,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/04_chapter_task.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_chapter_task_prompt",
+      "name": "Load Chapter Task Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
         5280,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/schemas/chapter_task.schema.json'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_chapter_task_schema",
+      "name": "Load Chapter Task Schema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5536,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Parse Outline 20').item.json;\nconst promptTemplate = $('Load Chapter Task Prompt').item.json.content;\nconst schema = $json.schema || $json;\nconst chapterIndex = Number(source.start_chapter || source.chapter_index || 1);\nconst outline = source.outline_20;\nconst chapterPlan = outline.chapters.find(ch => Number(ch.chapter_index) === chapterIndex);\nif (!chapterPlan) throw new Error('Chapter plan not found for chapter ' + chapterIndex);\nconst storySeed = source.story_seed || {};\nconst stateMemory = {\n  characters: [],\n  locations: [],\n  organizations: [],\n  must_remember: [\n    '主角设定：' + JSON.stringify(storySeed.protagonist_seed || {}, null, 2),\n    '主线冲突：' + (storySeed.main_conflict || ''),\n    '阶段结局：' + (storySeed.stage_ending || ''),\n    ...((storySeed.forbidden || []).map(item => '禁忌：' + item))\n  ].filter(Boolean)\n};\nconst payload = {\n  story_bible: source.story_bible_markdown,\n  chapter_plan: chapterPlan,\n  recent_summaries: [],\n  state_memory: stateMemory,\n  active_foreshadowing: []\n};\nconst prompt = `${promptTemplate}\n\n请基于以下输入生成第 ${chapterIndex} 章任务单。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n必须严格符合以下 JSON Schema，只输出 JSON，不要输出 Markdown 或解释：\n${JSON.stringify(schema, null, 2)}`;\nreturn [{ json: { ...source, chapter_index: chapterIndex, chapter_plan: chapterPlan, state_memory: stateMemory, prompt } }];"
+      },
+      "id": "build_gpt_chapter1_task_request",
+      "name": "Build GPT Chapter 1 Task Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5792,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.35, response_format: { type: 'json_object' }, messages: [ { role: 'system', content: '你是中文长篇小说章节导演。你必须只输出合法 JSON。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {}
+      },
+      "id": "openai_chapter1_task",
+      "name": "OpenAI Chapter 1 Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6048,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractContent(response) {\n  if (typeof response === 'string') {\n    try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n  }\n  if (typeof response.data === 'string') {\n    try { response = JSON.parse(response.data); } catch (err) {}\n  }\n  if (response.body && typeof response.body === 'string') {\n    try { response = JSON.parse(response.body); } catch (err) {}\n  }\n  return response.choices?.[0]?.message?.content\n    || response.content?.[0]?.text\n    || response.output_text\n    || response.text\n    || response.data?.choices?.[0]?.message?.content\n    || '';\n}\nfunction parseJsonFromText(raw, label) {\n  let txt = String(raw).trim();\n  if (txt.startsWith('```')) {\n    txt = txt.replace(/^```(?:json)?\\s*/i, '').replace(/```$/i, '').trim();\n  }\n  const s = txt.indexOf('{');\n  const e = txt.lastIndexOf('}');\n  if (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\n  try {\n    return JSON.parse(txt);\n  } catch (err) {\n    throw new Error(label + ' JSON parse failed: ' + raw);\n  }\n}\nconst source = $('Build GPT Chapter 1 Task Request').item.json;\nconst raw = extractContent($json);\nconst task = parseJsonFromText(raw, 'Chapter task');\nconst required = ['chapter_index','chapter_title','opening_state','ending_state','protagonist_goal','obstacle','required_information','avoid_conflicts','emotion_curve','cliffhanger','next_chapter_bridge'];\nfor (const key of required) {\n  if (!(key in task)) throw new Error('Chapter task missing field: ' + key);\n}\nif (Number(task.chapter_index) !== Number(source.chapter_index)) {\n  task.chapter_index = Number(source.chapter_index);\n}\nreturn [{ json: { ...source, chapter_task: task, chapter_task_raw: raw } }];"
+      },
+      "id": "parse_chapter1_task",
+      "name": "Parse Chapter 1 Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6304,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'chapter_tasks/ch001.task.json', content: $json.chapter_task } }}",
+        "options": {}
+      },
+      "id": "save_chapter1_task",
+      "name": "Save Chapter 1 Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6560,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/05_scene_cards.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_scene_cards_prompt",
+      "name": "Load Scene Cards Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6816,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/schemas/scene_card.schema.json'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_scene_card_schema",
+      "name": "Load Scene Card Schema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7072,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Parse Chapter 1 Task').item.json;\nconst promptTemplate = $('Load Scene Cards Prompt').item.json.content;\nconst schema = $json.schema || $json;\nconst payload = {\n  chapter_task: source.chapter_task,\n  story_bible: source.story_bible_markdown,\n  state_memory: source.state_memory || {}\n};\nconst prompt = `${promptTemplate}\n\n请基于以下输入拆分第 ${source.chapter_index} 章场景卡。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n必须严格符合以下 JSON Schema，只输出 JSON，不要输出 Markdown 或解释：\n${JSON.stringify(schema, null, 2)}`;\nreturn [{ json: { ...source, prompt } }];"
+      },
+      "id": "build_gpt_chapter1_scene_cards_request",
+      "name": "Build GPT Chapter 1 Scene Cards Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7328,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.35, response_format: { type: 'json_object' }, messages: [ { role: 'system', content: '你是中文长篇小说分镜编剧。你必须只输出合法 JSON。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {}
+      },
+      "id": "openai_chapter1_scene_cards",
+      "name": "OpenAI Chapter 1 Scene Cards",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7584,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function extractContent(response) {\n  if (typeof response === 'string') {\n    try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n  }\n  if (typeof response.data === 'string') {\n    try { response = JSON.parse(response.data); } catch (err) {}\n  }\n  if (response.body && typeof response.body === 'string') {\n    try { response = JSON.parse(response.body); } catch (err) {}\n  }\n  return response.choices?.[0]?.message?.content\n    || response.content?.[0]?.text\n    || response.output_text\n    || response.text\n    || response.data?.choices?.[0]?.message?.content\n    || '';\n}\nfunction parseJsonFromText(raw, label) {\n  let txt = String(raw).trim();\n  if (txt.startsWith('```')) {\n    txt = txt.replace(/^```(?:json)?\\s*/i, '').replace(/```$/i, '').trim();\n  }\n  const s = txt.indexOf('{');\n  const e = txt.lastIndexOf('}');\n  if (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\n  try {\n    return JSON.parse(txt);\n  } catch (err) {\n    throw new Error(label + ' JSON parse failed: ' + raw);\n  }\n}\nconst source = $('Build GPT Chapter 1 Scene Cards Request').item.json;\nconst raw = extractContent($json);\nconst sceneCards = parseJsonFromText(raw, 'Scene cards');\nif (Number(sceneCards.chapter_index) !== Number(source.chapter_index)) {\n  sceneCards.chapter_index = Number(source.chapter_index);\n}\nif (!Array.isArray(sceneCards.scenes) || sceneCards.scenes.length < 3 || sceneCards.scenes.length > 5) {\n  throw new Error('Scene cards must contain 3-5 scenes, got ' + (sceneCards.scenes || []).length);\n}\nfor (let i = 0; i < sceneCards.scenes.length; i++) {\n  sceneCards.scenes[i].scene_index = Number(sceneCards.scenes[i].scene_index || i + 1);\n}\nreturn [{ json: { ...source, scene_cards: sceneCards, scene_cards_raw: raw } }];"
+      },
+      "id": "parse_chapter1_scene_cards",
+      "name": "Parse Chapter 1 Scene Cards",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7840,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'scenes/ch001.scenes.json', content: $json.scene_cards } }}",
+        "options": {}
+      },
+      "id": "save_chapter1_scene_cards",
+      "name": "Save Chapter 1 Scene Cards",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8096,
         160
       ]
     }
@@ -689,6 +957,138 @@
       ]
     },
     "Save Outline 20": {
+      "main": [
+        [
+          {
+            "node": "Load Chapter Task Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Chapter Task Prompt": {
+      "main": [
+        [
+          {
+            "node": "Load Chapter Task Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Chapter Task Schema": {
+      "main": [
+        [
+          {
+            "node": "Build GPT Chapter 1 Task Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build GPT Chapter 1 Task Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Chapter 1 Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chapter 1 Task": {
+      "main": [
+        [
+          {
+            "node": "Parse Chapter 1 Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Chapter 1 Task": {
+      "main": [
+        [
+          {
+            "node": "Save Chapter 1 Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Chapter 1 Task": {
+      "main": [
+        [
+          {
+            "node": "Load Scene Cards Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Scene Cards Prompt": {
+      "main": [
+        [
+          {
+            "node": "Load Scene Card Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Scene Card Schema": {
+      "main": [
+        [
+          {
+            "node": "Build GPT Chapter 1 Scene Cards Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build GPT Chapter 1 Scene Cards Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Chapter 1 Scene Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chapter 1 Scene Cards": {
+      "main": [
+        [
+          {
+            "node": "Parse Chapter 1 Scene Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Chapter 1 Scene Cards": {
+      "main": [
+        [
+          {
+            "node": "Save Chapter 1 Scene Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Chapter 1 Scene Cards": {
       "main": [
         [
           {
