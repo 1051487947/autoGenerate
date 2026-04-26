@@ -432,3 +432,51 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 第一章闭环已经跑通，但 QA 规则需要再优化；高分章节不应默认进入强制重写和人工确认，建议把 `needs_rewrite` 与 `needs_manual_review` 的判断规则显式写入 prompt 或增加 Code 节点二次归一化。
   - 下一步应做“QA 修订闭环”：当 QA 只是定点问题时，自动生成一版 `chapters/ch001.revised.md`，并保留原始 `chapters/ch001.md` 作为版本对照。
   - 再下一步才建议推广到 20 章循环，避免把单章质量门槛的问题放大到整本书。
+
+## 2026-04-26 章节循环 Worker 修复与 2 章验证
+
+- 背景：用户指出当前流程看起来都是第 1 章相关，担心没有真正的章节循环。
+- 已确认旧的 `Novel Seed - Bridge GPT MVP` 是第 1 章硬编码 MVP；新的循环设计应使用：
+  - 主流程：`novel_book_loop_mvp` / `Novel Book Loop MVP`
+  - 单章子流程：`novel_single_chapter_worker` / `Novel Single Chapter Worker`
+- 已修复 `Novel Single Chapter Worker` 中 `Build Scene Draft Requests` 的 JS 转义问题：
+  - 原写法：`join('\n')`
+  - 在 n8n 反序列化后会变成 JS 字符串里的真实换行，导致 `Unterminated string constant`。
+  - 新写法：`join(String.fromCharCode(10))`，避免转义被 n8n 二次解释。
+- 已用 Node 对 `Novel Single Chapter Worker.json` 和 `Novel Book Loop MVP.json` 的所有 Code 节点做语法预检，结果通过。
+- 已提交并推送 GitHub：
+  - `754dcfd fix scene draft worker newline join`
+- 已部署到服务器 N8N SQLite：
+  - 更新目标 workflow：`novel_single_chapter_worker`
+  - 更新后节点数：37
+  - 服务器备份：`/opt/n8n-cn/backups/workflow_novel_single_chapter_worker_20260426_134240.json`
+- 已完成 1 章 smoke：
+  - 测试书 ID：`loop_worker_smoke2_20260426_214300`
+  - 主执行：`16`，`novel_book_loop_mvp`，success
+  - 子执行：`17`，`novel_single_chapter_worker`，success
+  - 生成文件包含：
+    - `outline/chapters_20.json`
+    - `chapter_tasks/ch001.task.json`
+    - `scenes/ch001.scenes.json`
+    - `scenes/ch001_scene01.md` 至 `scenes/ch001_scene05.md`
+    - `chapters/ch001.md`
+    - `review/ch001.qa.json`
+    - `memory/ch001.memory.json`
+- 已完成 2 章循环验证：
+  - 测试书 ID：`loop_worker_2ch_20260426_215817`
+  - 主执行：`18`，`novel_book_loop_mvp`，success
+  - 第 1 章 Worker：`19`，success
+  - 第 2 章 Worker：`20`，success
+  - 关键证据：
+    - 第 1 章完成后，主流程自动启动第 2 章 Worker。
+    - 已生成 `chapter_tasks/ch002.task.json`、`scenes/ch002.scenes.json`、`chapters/ch002.md`、`review/ch002.qa.json`、`memory/ch002.memory.json`。
+  - 第 1 章标题：`# 第1章 这单送完我就辞职`，约 5149 字符。
+  - 第 2 章标题：`# 第2章 会议室里来了个送件的`，约 4023 字符。
+  - 两章 QA 总分均为 `89`，`major_conflict=false`，但仍为 `needs_rewrite=true`。
+- 当前结论：
+  - “章节循环”已经被运行验证，不再是只生成第 1 章的硬编码链路。
+  - 当前主要风险已从“流程结构错误”转为“质量门槛和自动精修策略”：高分但有定点问题的章节应进入自动精修，而不是简单视为失败。
+- 建议下一步：
+  - 增加 QA 归一化规则：例如 `total_score >= 85` 且 `major_conflict=false` 时，`needs_rewrite` 视为 `needs_polish`。
+  - 增加 `chapter_revision` 节点：根据 `rewrite_instruction` 生成 `chapters/chXXX.revised.md`，保留原稿。
+  - 再跑 `start_chapter=1,end_chapter=3` 或直接低速跑 20 章，验证长期状态回写是否稳定。
