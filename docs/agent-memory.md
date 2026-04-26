@@ -265,3 +265,12 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `OPENAI_BASE_URL`
   - `OPENAI_API_KEY`
   - `OPENAI_MODEL=gpt-4o`
+
+## 2026-04-26 端口开放权限判断
+
+- 用户要求开放 `8765` 并从本地验证可达。
+- 已从本地验证 `http://8.140.56.75:8765/health` 当前不可达/超时。
+- 已尝试免密 SSH 到 `root@8.140.56.75`，未获得可用宿主机命令执行能力。
+- 已确认 N8N 后端账号可以管理 workflow，但不能修改宿主机防火墙、Docker Compose 端口映射或云厂商安全组。
+- 结论：开放公网 `8765` 需要 SSH/root 权限或云控制台安全组权限。仅凭 N8N 登录账号无法完成。
+- 仍建议优先使用 Docker 内网访问 `http://novel-bridge:8765`，公网开放只作为调试选项。
