@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SceneCardList",
+  "type": "object",
+  "required": ["chapter_index", "scenes"],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "scenes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "scene_index",
+          "pov",
+          "location",
+          "characters",
+          "scene_goal",
+          "conflict",
+          "emotion",
+          "key_actions",
+          "new_information",
+          "state_changes",
+          "turning_point",
+          "next_bridge"
+        ],
+        "properties": {
+          "scene_index": { "type": "integer" },
+          "pov": { "type": "string" },
+          "location": { "type": "string" },
+          "characters": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "scene_goal": { "type": "string" },
+          "conflict": { "type": "string" },
+          "emotion": { "type": "string" },
+          "key_actions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "new_information": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "state_changes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "turning_point": { "type": "string" },
+          "next_bridge": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

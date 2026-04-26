@@ -1,0 +1,59 @@
+{
+  "characters": [
+    {
+      "id": "char_lin_zhou",
+      "name": "林舟",
+      "role": "主角",
+      "initial_identity": "同城快递员",
+      "public_identity": "恒远集团代理董事长候选人",
+      "surface_goal": "送完快递，攒钱开社区驿站",
+      "deep_desire": "不被权力和旧事摆布，靠自己过安稳日子",
+      "strengths": ["熟悉末端配送", "能识别一线假数据", "责任感强", "敢说实话"],
+      "weaknesses": ["抗拒权力", "不懂董事会话术", "容易被激将", "不擅长资本规则"],
+      "current_location": "江城",
+      "status": "active"
+    },
+    {
+      "id": "char_shen_tinglan",
+      "name": "沈听澜",
+      "role": "女主/关键搭档",
+      "identity": "董事长办公室特别助理",
+      "function": "把林舟的一线判断转化为管理方案",
+      "attitude_to_protagonist": "从怀疑到观察",
+      "status": "active"
+    },
+    {
+      "id": "char_cheng_wanshan",
+      "name": "程万山",
+      "role": "阶段反派",
+      "identity": "恒远集团副董事长",
+      "goal": "夺取集团控制权，掩盖供应链利益输送",
+      "methods": ["董事会施压", "制造专业壁垒", "操控外包项目", "舆论打击"],
+      "status": "active"
+    },
+    {
+      "id": "char_xu_man",
+      "name": "许曼",
+      "role": "公关压力源",
+      "identity": "品牌公关负责人",
+      "function": "制造舆论危机，也为后续倒向主角留下空间",
+      "status": "active"
+    },
+    {
+      "id": "char_lao_zhou",
+      "name": "老周",
+      "role": "基层支点",
+      "identity": "快递站点老师傅",
+      "function": "提供一线经验、站点人脉和情感锚点",
+      "status": "active"
+    },
+    {
+      "id": "char_lin_yuanqiao",
+      "name": "林远桥",
+      "role": "旧案线索人物",
+      "identity": "恒远创始人旧友",
+      "function": "连接林舟父亲、继承协议和旧日真相",
+      "status": "hidden"
+    }
+  ]
+}

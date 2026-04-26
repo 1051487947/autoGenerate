@@ -1,0 +1,50 @@
+{
+  "characters": [
+    {
+      "id": "char_lin_zhou",
+      "name": "林舟",
+      "current_identity": "快递员",
+      "public_position": "尚未进入恒远集团",
+      "current_goal": "准时送件，攒钱开社区驿站",
+      "must_keep": ["不主动追求权力", "擅长一线物流判断", "不能突然变成全能霸总"]
+    },
+    {
+      "id": "char_shen_tinglan",
+      "name": "沈听澜",
+      "current_identity": "董事长办公室特别助理",
+      "current_goal": "维持集团危机期间的基本秩序",
+      "must_keep": ["理性", "专业", "前期不轻易信任林舟"]
+    },
+    {
+      "id": "char_cheng_wanshan",
+      "name": "程万山",
+      "current_identity": "集团副董事长",
+      "current_goal": "夺取控制权并掩盖物流利益链",
+      "must_keep": ["老练", "不会低级失误", "前期不直接暴露全部底牌"]
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_jiangcheng",
+      "name": "江城",
+      "note": "故事主舞台，包含恒远集团总部、多个分拨仓、社区站点。"
+    },
+    {
+      "id": "loc_hengyuan_hq",
+      "name": "恒远集团总部",
+      "note": "董事会、总裁办、数据中心所在地。"
+    }
+  ],
+  "organizations": [
+    {
+      "id": "org_hengyuan",
+      "name": "恒远集团",
+      "status": "董事长病退，董事会内斗，物流系统危机爆发前夜。"
+    }
+  ],
+  "must_remember": [
+    "第一阶段只揭开程万山利益链的一角，不完全解决集团深层问题。",
+    "林舟的能力来自真实配送经验，不来自突然获得商业天赋。",
+    "轻喜剧外壳下，商业冲突要有具体业务抓手。"
+  ]
+}

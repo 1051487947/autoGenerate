@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ChapterPlanList",
+  "type": "object",
+  "required": ["book_title", "chapter_count", "chapters"],
+  "properties": {
+    "book_title": { "type": "string" },
+    "chapter_count": { "type": "integer", "const": 20 },
+    "chapters": {
+      "type": "array",
+      "minItems": 20,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "required": [
+          "chapter_index",
+          "chapter_title",
+          "chapter_goal",
+          "main_conflict",
+          "key_reveal",
+          "emotional_beat",
+          "state_changes",
+          "cliffhanger"
+        ],
+        "properties": {
+          "chapter_index": { "type": "integer", "minimum": 1, "maximum": 20 },
+          "chapter_title": { "type": "string" },
+          "chapter_goal": { "type": "string" },
+          "main_conflict": { "type": "string" },
+          "key_reveal": { "type": "string" },
+          "emotional_beat": { "type": "string" },
+          "state_changes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "cliffhanger": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

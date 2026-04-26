@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ChapterTask",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "chapter_title",
+    "opening_state",
+    "ending_state",
+    "protagonist_goal",
+    "obstacle",
+    "required_information",
+    "avoid_conflicts",
+    "emotion_curve",
+    "cliffhanger",
+    "next_chapter_bridge"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "chapter_title": { "type": "string" },
+    "opening_state": { "type": "string" },
+    "ending_state": { "type": "string" },
+    "protagonist_goal": { "type": "string" },
+    "obstacle": { "type": "string" },
+    "required_information": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "avoid_conflicts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "emotion_curve": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "cliffhanger": { "type": "string" },
+    "next_chapter_bridge": { "type": "string" }
+  },
+  "additionalProperties": false
+}
+

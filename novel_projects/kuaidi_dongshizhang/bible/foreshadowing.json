@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "id": "f001_inheritance_name",
+      "title": "继承协议中的名字",
+      "introduced_at": "chapter_004",
+      "status": "planned",
+      "note": "林舟名字出现在旧继承协议中，但原因只揭开一半。"
+    },
+    {
+      "id": "f002_old_chairman_route",
+      "title": "老董事长知道林舟路线",
+      "introduced_at": "chapter_003",
+      "status": "planned",
+      "note": "老董事长曾长期关注林舟的配送区域。"
+    },
+    {
+      "id": "f003_logistics_sabotage",
+      "title": "物流系统崩盘并非意外",
+      "introduced_at": "chapter_002",
+      "status": "planned",
+      "note": "异常件、错配率和外包账目背后有人为痕迹。"
+    },
+    {
+      "id": "f004_father_past",
+      "title": "林舟父亲与恒远旧案",
+      "introduced_at": "chapter_011",
+      "status": "planned",
+      "note": "林舟父亲曾参与恒远早期物流系统建设。"
+    },
+    {
+      "id": "f005_supply_chain_finance",
+      "title": "供应链金融利益链",
+      "introduced_at": "chapter_008",
+      "status": "planned",
+      "note": "程万山控制的外包项目与供应链金融坏账有关。"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QaReport",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "logic_score",
+    "character_score",
+    "pace_score",
+    "information_score",
+    "emotion_score",
+    "style_score",
+    "hook_score",
+    "total_score",
+    "major_conflict",
+    "needs_rewrite",
+    "needs_manual_review",
+    "problems",
+    "rewrite_instruction"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "logic_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "character_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "pace_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "information_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "emotion_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "style_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "hook_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "total_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "major_conflict": { "type": "boolean" },
+    "needs_rewrite": { "type": "boolean" },
+    "needs_manual_review": { "type": "boolean" },
+    "problems": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "rewrite_instruction": { "type": "string" }
+  },
+  "additionalProperties": false
+}
+

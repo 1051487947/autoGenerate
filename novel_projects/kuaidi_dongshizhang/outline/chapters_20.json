@@ -1,0 +1,206 @@
+{
+  "book_title": "我要送快递可是你非要我做董事长",
+  "chapter_count": 20,
+  "chapters": [
+    {
+      "chapter_index": 1,
+      "chapter_title": "送错的会议室",
+      "chapter_goal": "让林舟误入恒远集团董事会，被误认为神秘继承人。",
+      "main_conflict": "林舟急着让人签收快递，董事们却逼他对集团危机表态。",
+      "key_reveal": "恒远集团的城市配送系统正处于崩盘边缘。",
+      "emotional_beat": "荒诞、紧张、误会升级。",
+      "state_changes": ["林舟进入董事会视野", "沈听澜开始关注林舟"],
+      "cliffhanger": "董事长秘书当众喊出林舟的名字，并称老董事长等他很久了。"
+    },
+    {
+      "chapter_index": 2,
+      "chapter_title": "快递员的三句话",
+      "chapter_goal": "让林舟无意间指出物流系统崩盘的真实症结。",
+      "main_conflict": "高管用复杂报表掩盖问题，林舟用配送经验拆穿。",
+      "key_reveal": "异常件集中在三个外包仓，数据并非自然波动。",
+      "emotional_beat": "质疑、反击、第一次爽点。",
+      "state_changes": ["董事会误以为林舟在基层暗访", "程万山开始警惕"],
+      "cliffhanger": "沈听澜发现林舟说的三个仓，正好都属于程万山体系。"
+    },
+    {
+      "chapter_index": 3,
+      "chapter_title": "我真不是来考察的",
+      "chapter_goal": "扩大身份误会，让林舟越解释越像低调掌权者。",
+      "main_conflict": "林舟想离开送下一单，董事会却要求他主持临时会议。",
+      "key_reveal": "老董事长曾留下指令：见到林舟，一切会议优先听他意见。",
+      "emotional_beat": "喜剧、错位、压力上升。",
+      "state_changes": ["林舟被临时留在集团", "沈听澜被指派协助林舟"],
+      "cliffhanger": "老董事长病房传来视频请求，只点名要见林舟。"
+    },
+    {
+      "chapter_index": 4,
+      "chapter_title": "继承协议",
+      "chapter_goal": "引出林舟与恒远集团的法律关联。",
+      "main_conflict": "林舟否认身份，法务却拿出含有他名字的旧协议。",
+      "key_reveal": "林舟拥有触发代理董事长程序的特殊签名权。",
+      "emotional_beat": "震惊、抗拒、疑云。",
+      "state_changes": ["林舟无法立刻脱身", "继承协议伏笔出现"],
+      "cliffhanger": "协议附件上有林舟父亲的旧签名。"
+    },
+    {
+      "chapter_index": 5,
+      "chapter_title": "代理董事长的一天",
+      "chapter_goal": "让林舟被迫接手濒临失控的子公司。",
+      "main_conflict": "程万山推给林舟一个注定失败的仓配整改任务。",
+      "key_reveal": "子公司的亏损并非业务差，而是调度系统被人为拖慢。",
+      "emotional_beat": "被迫、试探、初次接盘。",
+      "state_changes": ["林舟成为临时负责人", "程万山设下第一局"],
+      "cliffhanger": "林舟要求先去最乱的分拨仓，而不是听汇报。"
+    },
+    {
+      "chapter_index": 6,
+      "chapter_title": "最乱的仓库",
+      "chapter_goal": "展示林舟的一线能力，让他在仓库现场发现问题。",
+      "main_conflict": "仓库负责人试图用流程话术糊弄林舟。",
+      "key_reveal": "错分、压件和虚假签收来自同一套考核漏洞。",
+      "emotional_beat": "现场感、打脸、基层共鸣。",
+      "state_changes": ["一线员工开始动摇", "林舟获得第一批真实数据"],
+      "cliffhanger": "老周认出其中一个外包负责人曾经威胁过站点。"
+    },
+    {
+      "chapter_index": 7,
+      "chapter_title": "签不下去的项目",
+      "chapter_goal": "让反派诱导林舟签下失败项目，林舟用常识避坑。",
+      "main_conflict": "程万山逼林舟当天签署高价外包续约。",
+      "key_reveal": "合同里的路线补贴和实际配送里程严重不符。",
+      "emotional_beat": "压迫、识破、反套路。",
+      "state_changes": ["林舟拒签合同", "程万山转向舆论施压"],
+      "cliffhanger": "媒体突然收到消息：快递员董事长导致集团项目停摆。"
+    },
+    {
+      "chapter_index": 8,
+      "chapter_title": "一张签收单",
+      "chapter_goal": "用小证据撬开供应链利益链。",
+      "main_conflict": "所有高管都说账目合规，林舟却盯上一张异常签收单。",
+      "key_reveal": "同一批货在系统里被重复流转，制造虚假成本。",
+      "emotional_beat": "悬疑、推进、爽点。",
+      "state_changes": ["供应链金融伏笔出现", "沈听澜开始主动配合林舟"],
+      "cliffhanger": "签收单收件人竟是程万山亲信名下公司。"
+    },
+    {
+      "chapter_index": 9,
+      "chapter_title": "沈助理的选择",
+      "chapter_goal": "推动沈听澜和林舟建立初步信任。",
+      "main_conflict": "沈听澜必须在职业安全和支持林舟之间选择。",
+      "key_reveal": "她手里掌握着老董事长留下的一部分权限。",
+      "emotional_beat": "试探、信任、并肩。",
+      "state_changes": ["沈听澜成为林舟的正式搭档", "林舟获得有限数据权限"],
+      "cliffhanger": "权限打开后，系统显示最近三个月有人定时删除异常记录。"
+    },
+    {
+      "chapter_index": 10,
+      "chapter_title": "第一次盈利",
+      "chapter_goal": "完成中段小胜，让林舟的方案产生真实效果。",
+      "main_conflict": "董事会要求三天内看到结果，否则撤掉林舟。",
+      "key_reveal": "林舟调整路线和仓配优先级后，子公司单日成本明显下降。",
+      "emotional_beat": "压力、执行、胜利。",
+      "state_changes": ["子公司首次扭亏", "基层员工开始支持林舟"],
+      "cliffhanger": "林舟提交辞职申请，却被告知集团更大的危机刚刚开始。"
+    },
+    {
+      "chapter_index": 11,
+      "chapter_title": "父亲的旧照片",
+      "chapter_goal": "打开林舟父亲与恒远旧案的身世线。",
+      "main_conflict": "林舟想退出，旧照片却让他无法置身事外。",
+      "key_reveal": "林舟父亲曾是恒远早期物流系统的设计者之一。",
+      "emotional_beat": "困惑、沉重、牵连。",
+      "state_changes": ["父亲旧案伏笔出现", "林舟开始主动追问真相"],
+      "cliffhanger": "照片背面写着一句话：不要让程万山碰物流账。"
+    },
+    {
+      "chapter_index": 12,
+      "chapter_title": "学历造假风波",
+      "chapter_goal": "让反派发动舆论攻击，把林舟推到公众面前。",
+      "main_conflict": "媒体质疑快递员凭什么掌管集团。",
+      "key_reveal": "许曼参与推动舆论，但也发现程万山给的材料有删改。",
+      "emotional_beat": "危机、羞辱、反击准备。",
+      "state_changes": ["林舟身份公开", "许曼对程万山产生怀疑"],
+      "cliffhanger": "发布会上，林舟没有否认快递员身份，反而拿出一摞投诉单。"
+    },
+    {
+      "chapter_index": 13,
+      "chapter_title": "我就是送快递的",
+      "chapter_goal": "让林舟公开承认身份，并把劣势转为优势。",
+      "main_conflict": "记者围攻林舟，董事会担心股价受影响。",
+      "key_reveal": "投诉单对应的每个问题都指向集团高层的错误决策。",
+      "emotional_beat": "坦诚、反转、群众支持。",
+      "state_changes": ["基层员工公开支持林舟", "舆论从嘲笑转向讨论真实问题"],
+      "cliffhanger": "程万山启动董事会罢免程序。"
+    },
+    {
+      "chapter_index": 14,
+      "chapter_title": "罢免会议",
+      "chapter_goal": "让董事会权力斗争正面爆发。",
+      "main_conflict": "程万山要求立刻解除林舟代理权。",
+      "key_reveal": "老董事长留下的代理权需要业务数据达标才能延续。",
+      "emotional_beat": "对峙、压迫、悬念。",
+      "state_changes": ["林舟必须用数据保住位置", "董事阵营开始分裂"],
+      "cliffhanger": "关键数据服务器在会议前一小时宕机。"
+    },
+    {
+      "chapter_index": 15,
+      "chapter_title": "没有服务器的报表",
+      "chapter_goal": "让林舟用一线备份数据反击罢免。",
+      "main_conflict": "反派删除系统数据，林舟必须证明业务改善真实存在。",
+      "key_reveal": "快递站点的手工记录和客户签收链能还原真实数据。",
+      "emotional_beat": "紧张、反击、阶段大爽点。",
+      "state_changes": ["林舟赢得关键投票", "程万山第一次公开失手"],
+      "cliffhanger": "恢复的数据里出现一笔指向海外空壳公司的异常款项。"
+    },
+    {
+      "chapter_index": 16,
+      "chapter_title": "腐烂的不是仓库",
+      "chapter_goal": "把矛盾从物流问题升级到集团系统性腐败。",
+      "main_conflict": "林舟想继续查账，却被告知越界。",
+      "key_reveal": "供应链金融、外包仓和坏账之间存在闭环。",
+      "emotional_beat": "压抑、升级、决心。",
+      "state_changes": ["林舟明确敌人不只是程万山个人", "调查范围扩大"],
+      "cliffhanger": "关键证人老周突然失联。"
+    },
+    {
+      "chapter_index": 17,
+      "chapter_title": "丢失的包裹",
+      "chapter_goal": "通过寻找老周，把快递网络变成取证网络。",
+      "main_conflict": "程万山的人试图截走关键证据。",
+      "key_reveal": "证据被伪装成普通包裹，在城市配送链中流转。",
+      "emotional_beat": "追踪、紧迫、团队协作。",
+      "state_changes": ["林舟动员基层配送网络", "老周处于危险边缘"],
+      "cliffhanger": "包裹最后的定位停在程万山私人会所附近。"
+    },
+    {
+      "chapter_index": 18,
+      "chapter_title": "全城派送",
+      "chapter_goal": "完成一次反套路取证行动。",
+      "main_conflict": "反派堵住正式渠道，林舟用配送路线绕开封锁。",
+      "key_reveal": "外包利益链核心账本被成功取回。",
+      "emotional_beat": "热血、机智、群像爽点。",
+      "state_changes": ["基层员工成为林舟的真实力量", "证据链基本成型"],
+      "cliffhanger": "账本显示，还有一位董事比程万山隐藏更深。"
+    },
+    {
+      "chapter_index": 19,
+      "chapter_title": "董事长的快递箱",
+      "chapter_goal": "让林舟在董事会决战中完成身份转变。",
+      "main_conflict": "程万山最后反扑，逼林舟在权力和自由之间选择。",
+      "key_reveal": "老董事长选择林舟，是因为林舟父亲当年守住过同一条底线。",
+      "emotional_beat": "抉择、揭示、爆发。",
+      "state_changes": ["林舟接受阶段责任", "程万山被迫交出部分权限"],
+      "cliffhanger": "林舟把董事长印章放进快递箱，走进发布会现场。"
+    },
+    {
+      "chapter_index": 20,
+      "chapter_title": "新规则从一线开始",
+      "chapter_goal": "收束第一阶段，让林舟主动提出自己的董事长规则。",
+      "main_conflict": "董事会希望林舟按旧规则妥协，林舟拒绝只做牌面人物。",
+      "key_reveal": "恒远真正的重建必须从真实数据、一线员工和透明流程开始。",
+      "emotional_beat": "收束、昂扬、开启新卷。",
+      "state_changes": ["林舟正式接受代理董事长身份", "恒远进入改革阶段", "更深董事伏笔保留"],
+      "cliffhanger": "林舟收到一份匿名快递，里面是父亲当年留下的第二份账本。"
+    }
+  ]
+}

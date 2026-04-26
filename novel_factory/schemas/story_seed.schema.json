@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StorySeed",
+  "type": "object",
+  "required": [
+    "title",
+    "genre",
+    "reader_promise",
+    "core_hook",
+    "protagonist_seed",
+    "main_conflict",
+    "tone",
+    "stage_ending",
+    "long_form_potential"
+  ],
+  "properties": {
+    "title": { "type": "string" },
+    "genre": { "type": "string" },
+    "reader_promise": { "type": "string" },
+    "core_hook": { "type": "string" },
+    "protagonist_seed": {
+      "type": "object",
+      "required": ["name_placeholder", "surface_goal", "deep_desire", "contradiction"],
+      "properties": {
+        "name_placeholder": { "type": "string" },
+        "surface_goal": { "type": "string" },
+        "deep_desire": { "type": "string" },
+        "contradiction": { "type": "string" }
+      }
+    },
+    "main_conflict": { "type": "string" },
+    "tone": { "type": "string" },
+    "stage_ending": { "type": "string" },
+    "long_form_potential": { "type": "string" },
+    "forbidden": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
+

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MemoryUpdate",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "summary",
+    "new_facts",
+    "character_state_changes",
+    "relationship_changes",
+    "foreshadowing_updates",
+    "location_or_org_changes",
+    "must_remember_next"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "summary": { "type": "string" },
+    "new_facts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "character_state_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["character", "change"],
+        "properties": {
+          "character": { "type": "string" },
+          "change": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "relationship_changes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "foreshadowing_updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "note"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "type": "string", "enum": ["new", "advanced", "resolved", "unchanged"] },
+          "note": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "location_or_org_changes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "must_remember_next": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
+

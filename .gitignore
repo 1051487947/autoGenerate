@@ -1,0 +1,31 @@
+# Secrets and local env
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / n8n local noise
+node_modules/
+.n8n/
+
+# Logs and transient browser output
+*.log
+.playwright-mcp/
+
+# Large raw generation traces can be kept local unless explicitly needed
+novel_projects/**/runs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
