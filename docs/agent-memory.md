@@ -301,3 +301,23 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 本地访问 `http://8.140.56.75:8765/health` 无 token 返回 `401`，说明公网端口可达且鉴权生效。
   - 本地带 token 访问返回 `{"status":"ok","root":"/workspace"}`。
 - 当前仍未配置真实 `OPENAI_API_KEY`。运行 `Novel Seed - Bridge GPT MVP` 前，需要在 `/opt/n8n-cn/.env` 中补充 `OPENAI_API_KEY` 并重建 N8N 容器，或通过其他安全方式注入。
+
+## 2026-04-26 自定义 OpenAI 兼容模型接入完成
+
+- 用户提供自定义 OpenAI 兼容网关和 API Key。Key 只写入服务器 `/opt/n8n-cn/.env`，未写入 GitHub 或文档。
+- 已配置：
+  - `OPENAI_BASE_URL=https://codexa.leizhen.cloud`
+  - `OPENAI_MODEL=gpt-5.4`
+  - `OPENAI_API_KEY` 已写入服务器 `.env`
+- 已验证网关 `/v1/models` 可用，可用模型包括 `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.5` 等。
+- 已验证 `gpt-5.4` 的 `/v1/chat/completions` 可用，支持 `response_format: { "type": "json_object" }`。
+- 已重建 N8N 容器，确认 N8N 容器内环境变量加载成功，并能直接调用自定义网关返回 `200`。
+- 已修复 `Novel Seed - Bridge GPT MVP` workflow 的解析兼容问题：
+  - 自定义网关响应有时会被 N8N HTTP Request 节点作为字符串或 `data` 包装传给下游。
+  - `Parse Story Seed` 已改为兼容字符串、`data`、`body` 和标准 `choices[0].message.content`。
+  - `Init Params` 默认 `openai_model` 已改为空字符串，优先使用服务器环境变量 `OPENAI_MODEL`。
+- 已激活并通过公网 Webhook 跑通完整最小闭环：
+  - 请求：`POST http://8.140.56.75:5678/webhook/novel-seed-bridge-gpt`
+  - 测试 `book_id`：`kuaidi_dongshizhang_server_test`
+  - 返回：`{"ok":true,"saved_path":"bible/story_seed.json"}`
+  - 落盘文件：`/opt/autoGenerate/novel_projects/kuaidi_dongshizhang_server_test/bible/story_seed.json`
