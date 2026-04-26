@@ -13,7 +13,7 @@ def load_json_column(value, fallback):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Update an existing n8n SQLite workflow from an exported workflow JSON.")
+    parser = argparse.ArgumentParser(description="Update or insert an n8n SQLite workflow from an exported workflow JSON.")
     parser.add_argument("--workflow-id", required=True, help="Existing n8n workflow id to update.")
     parser.add_argument("--db", default="/n8n/data/database.sqlite", help="Mounted n8n SQLite database path.")
     parser.add_argument(
@@ -22,6 +22,8 @@ def main() -> None:
         help="Mounted workflow JSON export path.",
     )
     parser.add_argument("--backup-dir", default="/n8n/backups", help="Directory used to store workflow backups.")
+    parser.add_argument("--insert-if-missing", action="store_true", help="Create the workflow when it does not exist.")
+    parser.add_argument("--project-id", default=None, help="Project id for newly inserted workflows.")
     args = parser.parse_args()
 
     db_path = Path(args.db)
@@ -37,7 +39,61 @@ def main() -> None:
         (args.workflow_id,),
     ).fetchone()
     if not row:
-        raise SystemExit(f"workflow not found: {args.workflow_id}")
+        if not args.insert_if_missing:
+            raise SystemExit(f"workflow not found: {args.workflow_id}")
+        project_id = args.project_id
+        if not project_id:
+            project_row = cursor.execute("select projectId from shared_workflow limit 1").fetchone()
+            if project_row:
+                project_id = project_row[0]
+        if not project_id:
+            project_row = cursor.execute("select id from project order by createdAt limit 1").fetchone()
+            if project_row:
+                project_id = project_row[0]
+        if not project_id:
+            raise SystemExit("project id is required when inserting a new workflow")
+
+        cursor.execute(
+            """
+            insert into workflow_entity (
+                id, name, active, nodes, connections, settings, staticData,
+                pinData, versionId, triggerCount, meta
+            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                args.workflow_id,
+                workflow.get("name") or args.workflow_id,
+                1 if workflow.get("active") else 0,
+                json.dumps(workflow.get("nodes") or [], ensure_ascii=False),
+                json.dumps(workflow.get("connections") or {}, ensure_ascii=False),
+                json.dumps(workflow.get("settings") or {}, ensure_ascii=False),
+                None,
+                json.dumps(workflow.get("pinData") or {}, ensure_ascii=False),
+                str(uuid.uuid4()),
+                0,
+                json.dumps(workflow.get("meta") or {}, ensure_ascii=False),
+            ),
+        )
+        cursor.execute(
+            """
+            insert or ignore into shared_workflow (workflowId, projectId, role)
+            values (?, ?, ?)
+            """,
+            (args.workflow_id, project_id, "workflow:owner"),
+        )
+        connection.commit()
+        print(
+            json.dumps(
+                {
+                    "inserted": args.workflow_id,
+                    "nodes": len(workflow.get("nodes") or []),
+                    "connections": len(workflow.get("connections") or {}),
+                    "project_id": project_id,
+                },
+                ensure_ascii=False,
+            )
+        )
+        return
 
     backup = {
         "id": row[0],
