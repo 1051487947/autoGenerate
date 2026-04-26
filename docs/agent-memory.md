@@ -346,3 +346,46 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
     - 第 2 章：`想辞职的人先被锁死`
     - 第 3 章：`董事会不讲人话`
 - 当前下一步：基于 `chapters_20.json` 生成第 1 章任务单和场景卡，然后再接正文生成。
+
+## 2026-04-26 N8N Workflow 扩展到第 1 章任务单与场景卡
+
+- 已将 `Novel Seed - Bridge GPT MVP` workflow 从 22 个节点扩展到 34 个节点。
+- 当前 active workflow ID 仍为 `CyRqZLtMyPxdOkpE`，旧 workflow `ZfOcpJ2nHvEzjuos` 未改动。
+- 当前链路：
+  - Webhook 输入标题。
+  - Bridge 初始化书籍项目。
+  - GPT 生成并保存 `bible/story_seed.json`。
+  - GPT 生成并保存 `bible/story_bible.md`。
+  - GPT 生成并保存 `outline/chapters_20.json`。
+  - GPT 生成并保存 `chapter_tasks/ch001.task.json`。
+  - GPT 生成并保存 `scenes/ch001.scenes.json`。
+- 已新增服务器 workflow 更新脚本：`novel_factory/deploy/update_n8n_sqlite_workflow.py`。
+  - 用途：在服务器 Docker 环境中，从仓库 workflow JSON 覆盖更新 N8N SQLite 中已有 workflow。
+  - 运行方式示例：
+    - `docker run --rm -v /opt/autoGenerate:/workspace -v /opt/n8n-cn:/n8n python:3.11-slim python /workspace/novel_factory/deploy/update_n8n_sqlite_workflow.py --workflow-id CyRqZLtMyPxdOkpE`
+  - 脚本会先备份原 workflow 到 `/opt/n8n-cn/backups/workflow_<id>_<timestamp>.json`。
+- 关键稳定性调整：
+  - 模型 HTTP Request 节点增加 `timeout: 300000`，避免模型长时间无响应导致流程无限挂起。
+  - Story Bible 生成提示词限制为 3500-6000 中文字符，避免初期设定稿过长拖慢 MVP。
+  - Webhook 恢复为 `responseMode=onReceived`：请求立即返回 `{"message":"Workflow was started"}`，后台继续生成文件。
+  - `book_id` 截断长度从 48 放宽到 80，避免带时间戳的测试 ID 被过度截断。
+- 已提交并推送相关 Git 提交：
+  - `3c37a99 add chapter one task and scene card workflow`
+  - `d3f010d add n8n sqlite workflow updater`
+  - `3be803e add model request timeouts`
+  - `fd04e68 restore async webhook and expand book id length`
+- 已部署到服务器 `/opt/autoGenerate`，并通过更新脚本同步到 N8N SQLite。
+- 最终异步 webhook 测试：
+  - 请求返回：`{"message":"Workflow was started"}`。
+  - 测试 `book_id`：`async_final_test_20260426_191242`。
+  - N8N execution：`10`，状态 `success`。
+  - 落盘目录：`/opt/autoGenerate/novel_projects/async_final_test_20260426_191242`。
+  - 已确认生成文件：
+    - `bible/story_seed.json`
+    - `bible/story_bible.md`
+    - `outline/chapters_20.json`
+    - `chapter_tasks/ch001.task.json`
+    - `scenes/ch001.scenes.json`
+- 观察结论：
+  - 同步 webhook `lastNode` 会等待数分钟，可能被 HTTP 层返回 `503`，但后台 execution 仍可能成功；MVP 更适合使用异步 `onReceived`，再通过文件落盘或 execution 状态查看结果。
+  - 下一步应继续接正文生成：按 `scenes/ch001.scenes.json` 拆分场景，生成 `scenes/ch001_scene01.md` 等，再合并为 `chapters/ch001.md`。
