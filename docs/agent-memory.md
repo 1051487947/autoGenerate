@@ -389,3 +389,46 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
 - 观察结论：
   - 同步 webhook `lastNode` 会等待数分钟，可能被 HTTP 层返回 `503`，但后台 execution 仍可能成功；MVP 更适合使用异步 `onReceived`，再通过文件落盘或 execution 状态查看结果。
   - 下一步应继续接正文生成：按 `scenes/ch001.scenes.json` 拆分场景，生成 `scenes/ch001_scene01.md` 等，再合并为 `chapters/ch001.md`。
+
+## 2026-04-26 N8N Workflow 扩展到第 1 章正文、QA 与记忆回写
+
+- 已将 `Novel Seed - Bridge GPT MVP` workflow 从 34 个节点扩展到 57 个节点。
+- 当前 active workflow ID 仍为 `CyRqZLtMyPxdOkpE`，旧 workflow `ZfOcpJ2nHvEzjuos` 未改动。
+- 新增链路：
+  - 读取 `06_writer_kimi_scene.md`。
+  - 基于 `scenes/ch001.scenes.json` 拆成多条场景正文请求。
+  - 保存 `scenes/ch001_scene01.md`、`scenes/ch001_scene02.md` 等场景正文片段。
+  - 读取 `07_chapter_editor.md`，合并润色为 `chapters/ch001.md`。
+  - 读取 `08_critic_auditor.md` 和 `qa_report.schema.json`，保存 `review/ch001.qa.json`。
+  - 读取 `09_memory_update.md` 和 `memory_update.schema.json`，保存 `memory/ch001.memory.json`。
+- 已处理两个运行问题：
+  - 场景正文节点原本会并发请求多个场景，触发自定义模型网关 `429 Concurrency limit exceeded`；已给 `OpenAI Scene Writer` 增加 batching：`batchSize=1`、`batchInterval=90000`。
+  - `Done` 汇总节点使用 `.item` 访问多 item 节点时触发 n8n item linking 错误；已改为 `.all()[0].json`。
+- 已提交并推送相关 Git 提交：
+  - `15ff503 add chapter one writing qa memory workflow`
+  - `87bf74d throttle scene writer requests`
+  - `e4df1fc fix done node item access`
+- 已部署到服务器 `/opt/autoGenerate`，并通过更新脚本同步到 N8N SQLite。
+- 最终异步 webhook 测试：
+  - 请求返回：`{"message":"Workflow was started"}`。
+  - 测试 `book_id`：`chapter1_done_success_test_20260426_203123`。
+  - N8N execution：`13`，状态 `success`。
+  - 落盘目录：`/opt/autoGenerate/novel_projects/chapter1_done_success_test_20260426_203123`。
+  - 已确认生成文件：
+    - `bible/story_seed.json`
+    - `bible/story_bible.md`
+    - `outline/chapters_20.json`
+    - `chapter_tasks/ch001.task.json`
+    - `scenes/ch001.scenes.json`
+    - `scenes/ch001_scene01.md` 至 `scenes/ch001_scene05.md`
+    - `chapters/ch001.md`
+    - `review/ch001.qa.json`
+    - `memory/ch001.memory.json`
+- 验证数据：
+  - `chapters/ch001.md` 长度约 `4752` 字符。
+  - QA 总分 `88`。
+  - QA 标记 `needs_rewrite=true`、`needs_manual_review=true`，但 `major_conflict=false`。
+- 当前观察：
+  - 第一章闭环已经跑通，但 QA 规则需要再优化；高分章节不应默认进入强制重写和人工确认，建议把 `needs_rewrite` 与 `needs_manual_review` 的判断规则显式写入 prompt 或增加 Code 节点二次归一化。
+  - 下一步应做“QA 修订闭环”：当 QA 只是定点问题时，自动生成一版 `chapters/ch001.revised.md`，并保留原始 `chapters/ch001.md` 作为版本对照。
+  - 再下一步才建议推广到 20 章循环，避免把单章质量门槛的问题放大到整本书。
