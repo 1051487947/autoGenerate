@@ -1,0 +1,312 @@
+{
+  "name": "Novel Seed - Bridge GPT MVP",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual_trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [160, 240]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "novel-seed-bridge-gpt",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook_trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [160, 80],
+      "webhookId": "novel-seed-bridge-gpt"
+    },
+    {
+      "parameters": {
+        "jsCode": "const defaults = {\n  title: '我要送快递可是你非要我做董事长',\n  book_id: 'kuaidi_dongshizhang',\n  chapter_count: 20,\n  target_words_per_chapter: 2500,\n  optional_genre: '都市轻喜剧爽文',\n  style_preference: '轻松、反套路、节奏快、带职场讽刺和底层智慧的爽感',\n  forbidden: ['不要把主角写成天生霸总', '不要让商业问题靠一句话无脑解决'],\n  openai_model: 'gpt-4o'\n};\nconst raw = $json || {};\nconst incoming = raw.body && typeof raw.body === 'object' ? raw.body : raw;\nconst title = incoming.title || incoming.bookTitle || defaults.title;\nconst safeBookId = String(incoming.book_id || incoming.bookId || defaults.book_id || title)\n  .trim()\n  .replace(/[\\\\/:*?\"<>|\\s]+/g, '_')\n  .replace(/^_+|_+$/g, '')\n  .slice(0, 48) || 'book';\nreturn [{ json: {\n  ...defaults,\n  ...incoming,\n  title,\n  bookTitle: title,\n  book_id: safeBookId,\n  chapter_count: Number(incoming.chapter_count || incoming.chapterCount || defaults.chapter_count),\n  target_words_per_chapter: Number(incoming.target_words_per_chapter || incoming.chapterTargetWords || defaults.target_words_per_chapter),\n  openai_model: incoming.openai_model || incoming.model || defaults.openai_model\n} }];"
+      },
+      "id": "init_params",
+      "name": "Init Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [416, 160]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/init'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { title: $json.title, book_id: $json.book_id, chapter_count: $json.chapter_count } }}",
+        "options": {}
+      },
+      "id": "bridge_init_book",
+      "name": "Bridge Init Book",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [672, 160]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/01_seed_from_title.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_seed_prompt",
+      "name": "Load Seed Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [928, 160]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/schemas/story_seed.schema.json'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_story_seed_schema",
+      "name": "Load Story Seed Schema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1184, 160]
+    },
+    {
+      "parameters": {
+        "jsCode": "const init = $('Init Params').item.json;\nconst promptTemplate = $('Load Seed Prompt').item.json.content;\nconst schema = $json.schema || $json;\nconst payload = {\n  title: init.title,\n  chapter_count: init.chapter_count,\n  optional_genre: init.optional_genre,\n  style_preference: init.style_preference,\n  forbidden: init.forbidden\n};\nconst prompt = `${promptTemplate}\\n\\n请根据以下输入生成故事种子。\\n输入：\\n${JSON.stringify(payload, null, 2)}\\n\\n必须严格符合以下 JSON Schema，不要输出 Markdown，不要输出解释：\\n${JSON.stringify(schema, null, 2)}`;\nreturn [{ json: { ...init, prompt } }];"
+      },
+      "id": "build_gpt_seed_request",
+      "name": "Build GPT Seed Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1440, 160]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.OPENAI_MODEL || 'gpt-4o', temperature: 0.4, response_format: { type: 'json_object' }, messages: [ { role: 'system', content: '你是中文类型小说总策划。你必须只输出合法 JSON。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {}
+      },
+      "id": "openai_seed",
+      "name": "OpenAI Seed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1696, 160]
+    },
+    {
+      "parameters": {
+        "jsCode": "const init = $('Build GPT Seed Request').item.json;\nconst raw = $json.choices?.[0]?.message?.content || $json.content?.[0]?.text || $json.output_text || '';\nlet txt = String(raw).trim();\nif (txt.startsWith('```')) {\n  txt = txt.replace(/^```(?:json)?\\s*/i, '').replace(/```$/i, '').trim();\n}\nconst s = txt.indexOf('{');\nconst e = txt.lastIndexOf('}');\nif (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\nlet storySeed;\ntry {\n  storySeed = JSON.parse(txt);\n} catch (err) {\n  throw new Error('Story seed JSON parse failed: ' + raw);\n}\nreturn [{ json: { ...init, story_seed: storySeed, story_seed_raw: raw } }];"
+      },
+      "id": "parse_story_seed",
+      "name": "Parse Story Seed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1952, 160]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'bible/story_seed.json', content: $json.story_seed } }}",
+        "options": {}
+      },
+      "id": "save_story_seed",
+      "name": "Save Story Seed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2208, 160]
+    },
+    {
+      "parameters": {
+        "jsCode": "const seed = $('Parse Story Seed').item.json;\nreturn [{ json: {\n  ok: true,\n  book_id: seed.book_id,\n  title: seed.title,\n  saved_path: 'bible/story_seed.json',\n  next_step: '生成 story_bible.md'\n} }];"
+      },
+      "id": "done",
+      "name": "Done",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2464, 160]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Init Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Init Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Params": {
+      "main": [
+        [
+          {
+            "node": "Bridge Init Book",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bridge Init Book": {
+      "main": [
+        [
+          {
+            "node": "Load Seed Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Seed Prompt": {
+      "main": [
+        [
+          {
+            "node": "Load Story Seed Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Story Seed Schema": {
+      "main": [
+        [
+          {
+            "node": "Build GPT Seed Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build GPT Seed Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Seed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Seed": {
+      "main": [
+        [
+          {
+            "node": "Parse Story Seed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Story Seed": {
+      "main": [
+        [
+          {
+            "node": "Save Story Seed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Story Seed": {
+      "main": [
+        [
+          {
+            "node": "Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "novel-seed-bridge-gpt-mvp",
+  "meta": {},
+  "id": "novel_seed_bridge_gpt_mvp",
+  "tags": []
+}

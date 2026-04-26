@@ -233,3 +233,18 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `novel_projects/`
 - 已新增根目录 `README.md`，说明仓库用途、目录结构、初始化新书命令和 N8N Bridge 启动命令。
 - 已新增 `.gitignore`，排除密钥、环境文件、Python 缓存、N8N 本地噪声、日志、Playwright 临时文件、`%SystemDrive%/`、`NVIDIA Corporation/` 环境噪声目录和 `novel_projects/**/runs/` 原始运行日志。
+
+## 2026-04-26 现有 N8N Workflow 升级判断
+
+- 用户提供现有 workflow 文件：`C:\Users\Administrator\Downloads\Novel MVP - Agent Skill Guarded.json`，并说明该 workflow 已在服务器上。
+- 已检查该 workflow：名称 `Novel MVP - Agent Skill Guarded`，共 28 个节点，当前链路为 Webhook/Manual -> Init -> Skill Guard -> Outline -> Draft -> Edit -> QA -> KodBox 归档。
+- 结论：需要更新，但不需要推倒重做。旧 workflow 的大纲、正文、润色、QA 骨架可以复用。
+- 主要问题：
+  - 当前 LLM 节点使用 `/v1/messages`、`glm-5-turbo`、Anthropic 风格响应解析；如果先用 GPT 跑，需要改成 OpenAI/兼容网关，并解析 `choices[0].message.content`。
+  - 当前状态大量依赖 `$getWorkflowStaticData('global')`，多运行/失败重试时容易串数据。
+  - 当前归档直接走 KodBox，不适合作为过程版本库。
+  - 当前没有接入 `novel_factory` 的 Prompt/Schema/Bridge，也没有把故事种子、圣经、大纲、章节任务单、场景卡等产物落到 Git 工作区。
+- 已新增安全测试 workflow：`novel_factory/n8n/Novel Seed - Bridge GPT MVP.json`。
+  - 用途：先跑通标题 -> Bridge 初始化项目 -> 读取 Prompt/Schema -> GPT 生成 `story_seed.json` -> Bridge 写回。
+  - 该 workflow 不替换服务器上的旧 workflow，适合作为 V2 冒烟链路导入测试。
+- 已新增升级说明：`novel_factory/n8n/existing-workflow-upgrade-notes.md`。
