@@ -274,3 +274,30 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
 - 已确认 N8N 后端账号可以管理 workflow，但不能修改宿主机防火墙、Docker Compose 端口映射或云厂商安全组。
 - 结论：开放公网 `8765` 需要 SSH/root 权限或云控制台安全组权限。仅凭 N8N 登录账号无法完成。
 - 仍建议优先使用 Docker 内网访问 `http://novel-bridge:8765`，公网开放只作为调试选项。
+
+## 2026-04-26 Novel Bridge 服务器部署完成
+
+- 用户提供 SSH/root 权限后，已在服务器 `8.140.56.75` 上完成 Novel Bridge 部署与端口开放。
+- 代码目录：`/opt/autoGenerate`，已从 GitHub 仓库拉取。
+- N8N Compose 目录：`/opt/n8n-cn`。
+- 新增 Compose override：`/opt/n8n-cn/docker-compose.override.yml`。
+- 新增容器：
+  - `novel-bridge`
+  - 镜像：`python:3.11-slim`
+  - 端口：`0.0.0.0:8765->8765/tcp`
+  - 工作目录：`/workspace`
+  - 挂载：`/opt/autoGenerate:/workspace`
+- N8N 容器已重建并加载环境变量：
+  - `NOVEL_BRIDGE_URL=http://novel-bridge:8765`
+  - `NOVEL_BRIDGE_TOKEN` 已生成并保存在 `/opt/n8n-cn/.env`
+  - `OPENAI_BASE_URL=https://api.openai.com`
+  - `OPENAI_MODEL=gpt-4o`
+- 为避免强制重建 N8N 时拉取最新 `n8nio/n8n:latest`，已将当前运行镜像打 tag 为 `n8n-local-current:preserve`，并在 override 中让 `n8n` 使用该本地镜像，避免意外升级。
+- firewalld 已放行：`8765/tcp`。
+- 验证结果：
+  - 服务器本机无 token 请求 `http://127.0.0.1:8765/health` 返回 `401 Unauthorized`，符合预期。
+  - 服务器本机带 token 请求返回 `{"status":"ok","root":"/workspace"}`。
+  - N8N 容器内访问 `http://novel-bridge:8765/health` 带 token 返回 `200`。
+  - 本地访问 `http://8.140.56.75:8765/health` 无 token 返回 `401`，说明公网端口可达且鉴权生效。
+  - 本地带 token 访问返回 `{"status":"ok","root":"/workspace"}`。
+- 当前仍未配置真实 `OPENAI_API_KEY`。运行 `Novel Seed - Bridge GPT MVP` 前，需要在 `/opt/n8n-cn/.env` 中补充 `OPENAI_API_KEY` 并重建 N8N 容器，或通过其他安全方式注入。
