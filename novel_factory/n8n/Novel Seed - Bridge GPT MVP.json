@@ -460,14 +460,14 @@
     },
     {
       "parameters": {
-        "jsCode": "const seed = $('Parse Story Seed').item.json;\nconst chapterTask = $('Parse Chapter 1 Task').item.json.chapter_task;\nconst sceneCards = $('Parse Chapter 1 Scene Cards').item.json.scene_cards;\nreturn [{ json: {\n  ok: true,\n  book_id: seed.book_id,\n  title: seed.title,\n  saved_paths: [\n    'bible/story_seed.json',\n    'bible/story_bible.md',\n    'outline/chapters_20.json',\n    'chapter_tasks/ch001.task.json',\n    'scenes/ch001.scenes.json'\n  ],\n  chapter_1: {\n    title: chapterTask.chapter_title,\n    scene_count: sceneCards.scenes.length\n  },\n  next_step: '生成第 1 章正文场景并合并为 chapters/ch001.md'\n} }];"
+        "jsCode": "const seed = $('Parse Story Seed').item.json;\nconst chapter = $('Parse Chapter 1 Markdown').item.json;\nconst qa = $('Parse QA Report').item.json.qa_report;\nconst memory = $('Parse Memory Update').item.json.memory_update;\nconst sceneTexts = $('Collect Scene Drafts').item.json.scene_texts || [];\nreturn [{ json: {\n  ok: true,\n  book_id: seed.book_id,\n  title: seed.title,\n  saved_paths: [\n    'bible/story_seed.json',\n    'bible/story_bible.md',\n    'outline/chapters_20.json',\n    'chapter_tasks/ch001.task.json',\n    'scenes/ch001.scenes.json',\n    ...sceneTexts.map(scene => scene.path),\n    'chapters/ch001.md',\n    'review/ch001.qa.json',\n    'memory/ch001.memory.json'\n  ],\n  chapter_1: {\n    title: chapter.chapter_task.chapter_title,\n    scene_count: sceneTexts.length,\n    qa_total_score: qa.total_score,\n    needs_rewrite: qa.needs_rewrite,\n    needs_manual_review: qa.needs_manual_review,\n    summary: memory.summary\n  },\n  next_step: '将单章正文闭环推广到 20 章循环，并接入 Kimi 写作模型'\n} }];"
       },
       "id": "done",
       "name": "Done",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8352,
+        14240,
         160
       ]
     },
@@ -740,6 +740,517 @@
       "typeVersion": 4.2,
       "position": [
         8096,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/06_writer_kimi_scene.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_scene_writer_prompt",
+      "name": "Load Scene Writer Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8352,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Parse Chapter 1 Scene Cards').item.json;\nconst promptTemplate = $json.content;\nconst scenes = source.scene_cards.scenes || [];\nconst styleRules = [\n  source.style_preference || '',\n  '每个场景控制在 800-1200 个中文字符。',\n  '不要提前写后续场景。',\n  '保留都市轻喜剧、身份错位、职场反差和底层智慧的爽点。',\n  '主角不能突然变成天生霸总，商业判断必须来自一线经验。'\n].filter(Boolean).join('\\n');\nreturn scenes.map((scene, index) => {\n  const sceneIndex = Number(scene.scene_index || index + 1);\n  const sceneNo = String(sceneIndex).padStart(2, '0');\n  const payload = {\n    story_bible: source.story_bible_markdown,\n    chapter_task: source.chapter_task,\n    scene_card: scene,\n    recent_context: index === 0 ? [] : scenes.slice(0, index).map(s => ({ scene_index: s.scene_index, next_bridge: s.next_bridge })),\n    style_rules: styleRules\n  };\n  const prompt = `${promptTemplate}\n\n请扩写第 ${source.chapter_index} 章第 ${sceneIndex} 场。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n要求：\n1. 只输出 Markdown 正文片段，不要输出 JSON。\n2. 不要用代码块包裹。\n3. 不要写章节标题，只写本场景正文。`;\n  return { json: { ...source, scene_card: scene, scene_index: sceneIndex, scene_path: `scenes/ch001_scene${sceneNo}.md`, prompt } };\n});"
+      },
+      "id": "build_scene_draft_requests",
+      "name": "Build Scene Draft Requests",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8608,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.WRITER_MODEL || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.65, messages: [ { role: 'system', content: '你是中文类型小说主笔。请按场景卡输出自然的 Markdown 小说正文片段。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "openai_scene_writer",
+      "name": "OpenAI Scene Writer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8864,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeResponse(response) {\n  if (typeof response === 'string') {\n    try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n  }\n  if (typeof response.data === 'string') {\n    try { response = JSON.parse(response.data); } catch (err) {}\n  }\n  if (response.body && typeof response.body === 'string') {\n    try { response = JSON.parse(response.body); } catch (err) {}\n  }\n  return response;\n}\nfunction extractContent(response) {\n  response = normalizeResponse(response);\n  return response.choices?.[0]?.message?.content\n    || response.content?.[0]?.text\n    || response.output_text\n    || response.text\n    || response.data?.choices?.[0]?.message?.content\n    || '';\n}\nfunction stripFence(text) {\n  let out = String(text || '').trim();\n  if (out.startsWith('```')) {\n    out = out.replace(/^```(?:markdown|md|json)?\\s*/i, '').replace(/```$/i, '').trim();\n  }\n  return out;\n}\nfunction parseJsonFromText(raw, label) {\n  let txt = stripFence(raw);\n  const s = txt.indexOf('{');\n  const e = txt.lastIndexOf('}');\n  if (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\n  try { return JSON.parse(txt); } catch (err) { throw new Error(label + ' JSON parse failed: ' + raw); }\n}\nconst responses = $input.all();\nconst sources = $('Build Scene Draft Requests').all();\nreturn responses.map((item, index) => {\n  const source = sources[index]?.json || {};\n  const raw = extractContent(item.json);\n  const markdown = stripFence(raw);\n  if (!markdown) throw new Error('Scene draft markdown is empty for scene ' + source.scene_index);\n  return { json: { ...source, scene_markdown: markdown, scene_raw: raw } };\n});"
+      },
+      "id": "parse_scene_drafts",
+      "name": "Parse Scene Drafts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9120,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: $json.scene_path, content: $json.scene_markdown } }}",
+        "options": {}
+      },
+      "id": "save_scene_drafts",
+      "name": "Save Scene Drafts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        9376,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const drafts = $('Parse Scene Drafts').all().map(item => item.json).sort((a, b) => Number(a.scene_index) - Number(b.scene_index));\nif (!drafts.length) throw new Error('No scene drafts to collect');\nconst base = drafts[0];\nreturn [{ json: {\n  ...base,\n  scene_texts: drafts.map(d => ({ scene_index: d.scene_index, path: d.scene_path, markdown: d.scene_markdown }))\n} }];"
+      },
+      "id": "collect_scene_drafts",
+      "name": "Collect Scene Drafts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9632,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/07_chapter_editor.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_chapter_editor_prompt",
+      "name": "Load Chapter Editor Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        9888,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Collect Scene Drafts').item.json;\nconst promptTemplate = $json.content;\nconst payload = {\n  chapter_task: source.chapter_task,\n  scene_texts: source.scene_texts,\n  style_rules: source.style_preference || '轻松、反套路、节奏快、带职场讽刺和底层智慧的爽感'\n};\nconst prompt = `${promptTemplate}\n\n请把以下场景正文合并润色为第 ${source.chapter_index} 章完整正文。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n要求：\n1. 输出 Markdown 章节正文。\n2. 章节标题使用：# 第${source.chapter_index}章 ${source.chapter_task.chapter_title}\n3. 不要输出代码块包裹。\n4. 控制在 3000-5000 个中文字符。`;\nreturn [{ json: { ...source, prompt } }];"
+      },
+      "id": "build_chapter_editor_request",
+      "name": "Build Chapter Editor Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10144,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.WRITER_MODEL || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.55, messages: [ { role: 'system', content: '你是中文类型小说责任编辑。请输出可直接保存的 Markdown 章节正文。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "openai_chapter_editor",
+      "name": "OpenAI Chapter Editor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10400,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeResponse(response) {\n  if (typeof response === 'string') {\n    try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n  }\n  if (typeof response.data === 'string') {\n    try { response = JSON.parse(response.data); } catch (err) {}\n  }\n  if (response.body && typeof response.body === 'string') {\n    try { response = JSON.parse(response.body); } catch (err) {}\n  }\n  return response;\n}\nfunction extractContent(response) {\n  response = normalizeResponse(response);\n  return response.choices?.[0]?.message?.content\n    || response.content?.[0]?.text\n    || response.output_text\n    || response.text\n    || response.data?.choices?.[0]?.message?.content\n    || '';\n}\nfunction stripFence(text) {\n  let out = String(text || '').trim();\n  if (out.startsWith('```')) {\n    out = out.replace(/^```(?:markdown|md|json)?\\s*/i, '').replace(/```$/i, '').trim();\n  }\n  return out;\n}\nfunction parseJsonFromText(raw, label) {\n  let txt = stripFence(raw);\n  const s = txt.indexOf('{');\n  const e = txt.lastIndexOf('}');\n  if (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\n  try { return JSON.parse(txt); } catch (err) { throw new Error(label + ' JSON parse failed: ' + raw); }\n}\nconst source = $('Build Chapter Editor Request').item.json;\nconst raw = extractContent($json);\nlet markdown = stripFence(raw);\nif (!markdown) throw new Error('Chapter markdown is empty');\nif (!markdown.startsWith('#')) {\n  markdown = `# 第${source.chapter_index}章 ${source.chapter_task.chapter_title}\n\n` + markdown;\n}\nreturn [{ json: { ...source, chapter_markdown: markdown, chapter_raw: raw } }];"
+      },
+      "id": "parse_chapter_1_markdown",
+      "name": "Parse Chapter 1 Markdown",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10656,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'chapters/ch001.md', content: $json.chapter_markdown } }}",
+        "options": {}
+      },
+      "id": "save_chapter_1_markdown",
+      "name": "Save Chapter 1 Markdown",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        10912,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/08_critic_auditor.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_critic_prompt",
+      "name": "Load Critic Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11168,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/schemas/qa_report.schema.json'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_qa_schema",
+      "name": "Load QA Schema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11424,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Parse Chapter 1 Markdown').item.json;\nconst promptTemplate = $('Load Critic Prompt').item.json.content;\nconst schema = $json.schema || $json;\nconst payload = {\n  story_bible: source.story_bible_markdown,\n  chapter_plan: source.chapter_plan,\n  chapter_task: source.chapter_task,\n  chapter_text: source.chapter_markdown,\n  state_memory: source.state_memory || {}\n};\nconst prompt = `${promptTemplate}\n\n请审稿第 ${source.chapter_index} 章。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n必须严格符合以下 JSON Schema，只输出 JSON，不要输出 Markdown 或解释：\n${JSON.stringify(schema, null, 2)}`;\nreturn [{ json: { ...source, prompt } }];"
+      },
+      "id": "build_qa_request",
+      "name": "Build QA Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11680,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.25, response_format: { type: 'json_object' }, messages: [ { role: 'system', content: '你是严苛的中文类型小说审稿编辑。你必须只输出合法 JSON。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "openai_qa",
+      "name": "OpenAI QA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        11936,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeResponse(response) {\n  if (typeof response === 'string') {\n    try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n  }\n  if (typeof response.data === 'string') {\n    try { response = JSON.parse(response.data); } catch (err) {}\n  }\n  if (response.body && typeof response.body === 'string') {\n    try { response = JSON.parse(response.body); } catch (err) {}\n  }\n  return response;\n}\nfunction extractContent(response) {\n  response = normalizeResponse(response);\n  return response.choices?.[0]?.message?.content\n    || response.content?.[0]?.text\n    || response.output_text\n    || response.text\n    || response.data?.choices?.[0]?.message?.content\n    || '';\n}\nfunction stripFence(text) {\n  let out = String(text || '').trim();\n  if (out.startsWith('```')) {\n    out = out.replace(/^```(?:markdown|md|json)?\\s*/i, '').replace(/```$/i, '').trim();\n  }\n  return out;\n}\nfunction parseJsonFromText(raw, label) {\n  let txt = stripFence(raw);\n  const s = txt.indexOf('{');\n  const e = txt.lastIndexOf('}');\n  if (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\n  try { return JSON.parse(txt); } catch (err) { throw new Error(label + ' JSON parse failed: ' + raw); }\n}\nconst source = $('Build QA Request').item.json;\nconst raw = extractContent($json);\nconst qa = parseJsonFromText(raw, 'QA report');\nqa.chapter_index = Number(qa.chapter_index || source.chapter_index);\nconst required = ['logic_score','character_score','pace_score','information_score','emotion_score','style_score','hook_score','total_score','major_conflict','needs_rewrite','needs_manual_review','problems','rewrite_instruction'];\nfor (const key of required) {\n  if (!(key in qa)) throw new Error('QA report missing field: ' + key);\n}\nreturn [{ json: { ...source, qa_report: qa, qa_raw: raw } }];"
+      },
+      "id": "parse_qa_report",
+      "name": "Parse QA Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12192,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'review/ch001.qa.json', content: $json.qa_report } }}",
+        "options": {}
+      },
+      "id": "save_qa_report",
+      "name": "Save QA Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12448,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/09_memory_update.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_memory_prompt",
+      "name": "Load Memory Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12704,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/schemas/memory_update.schema.json'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_memory_schema",
+      "name": "Load Memory Schema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        12960,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Parse QA Report').item.json;\nconst promptTemplate = $('Load Memory Prompt').item.json.content;\nconst schema = $json.schema || $json;\nconst payload = {\n  chapter_index: source.chapter_index,\n  chapter_title: source.chapter_task.chapter_title,\n  chapter_text: source.chapter_markdown,\n  previous_state_memory: source.state_memory || {},\n  previous_foreshadowing: []\n};\nconst prompt = `${promptTemplate}\n\n请为第 ${source.chapter_index} 章生成记忆回写。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n必须严格符合以下 JSON Schema，只输出 JSON，不要输出 Markdown 或解释：\n${JSON.stringify(schema, null, 2)}`;\nreturn [{ json: { ...source, prompt } }];"
+      },
+      "id": "build_memory_request",
+      "name": "Build Memory Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13216,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.25, response_format: { type: 'json_object' }, messages: [ { role: 'system', content: '你是小说连续性管理员。你必须只输出合法 JSON。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "openai_memory",
+      "name": "OpenAI Memory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13472,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeResponse(response) {\n  if (typeof response === 'string') {\n    try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n  }\n  if (typeof response.data === 'string') {\n    try { response = JSON.parse(response.data); } catch (err) {}\n  }\n  if (response.body && typeof response.body === 'string') {\n    try { response = JSON.parse(response.body); } catch (err) {}\n  }\n  return response;\n}\nfunction extractContent(response) {\n  response = normalizeResponse(response);\n  return response.choices?.[0]?.message?.content\n    || response.content?.[0]?.text\n    || response.output_text\n    || response.text\n    || response.data?.choices?.[0]?.message?.content\n    || '';\n}\nfunction stripFence(text) {\n  let out = String(text || '').trim();\n  if (out.startsWith('```')) {\n    out = out.replace(/^```(?:markdown|md|json)?\\s*/i, '').replace(/```$/i, '').trim();\n  }\n  return out;\n}\nfunction parseJsonFromText(raw, label) {\n  let txt = stripFence(raw);\n  const s = txt.indexOf('{');\n  const e = txt.lastIndexOf('}');\n  if (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\n  try { return JSON.parse(txt); } catch (err) { throw new Error(label + ' JSON parse failed: ' + raw); }\n}\nconst source = $('Build Memory Request').item.json;\nconst raw = extractContent($json);\nconst memory = parseJsonFromText(raw, 'Memory update');\nmemory.chapter_index = Number(memory.chapter_index || source.chapter_index);\nconst required = ['summary','new_facts','character_state_changes','relationship_changes','foreshadowing_updates','location_or_org_changes','must_remember_next'];\nfor (const key of required) {\n  if (!(key in memory)) throw new Error('Memory update missing field: ' + key);\n}\nreturn [{ json: { ...source, memory_update: memory, memory_raw: raw } }];"
+      },
+      "id": "parse_memory_update",
+      "name": "Parse Memory Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13728,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'memory/ch001.memory.json', content: $json.memory_update } }}",
+        "options": {}
+      },
+      "id": "save_memory_update",
+      "name": "Save Memory Update",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        13984,
         160
       ]
     }
@@ -1099,6 +1610,259 @@
       ]
     },
     "Save Chapter 1 Scene Cards": {
+      "main": [
+        [
+          {
+            "node": "Load Scene Writer Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Scene Writer Prompt": {
+      "main": [
+        [
+          {
+            "node": "Build Scene Draft Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Scene Draft Requests": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Scene Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Scene Writer": {
+      "main": [
+        [
+          {
+            "node": "Parse Scene Drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Scene Drafts": {
+      "main": [
+        [
+          {
+            "node": "Save Scene Drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Scene Drafts": {
+      "main": [
+        [
+          {
+            "node": "Collect Scene Drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Scene Drafts": {
+      "main": [
+        [
+          {
+            "node": "Load Chapter Editor Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Chapter Editor Prompt": {
+      "main": [
+        [
+          {
+            "node": "Build Chapter Editor Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Chapter Editor Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Chapter Editor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chapter Editor": {
+      "main": [
+        [
+          {
+            "node": "Parse Chapter 1 Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Chapter 1 Markdown": {
+      "main": [
+        [
+          {
+            "node": "Save Chapter 1 Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Chapter 1 Markdown": {
+      "main": [
+        [
+          {
+            "node": "Load Critic Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Critic Prompt": {
+      "main": [
+        [
+          {
+            "node": "Load QA Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load QA Schema": {
+      "main": [
+        [
+          {
+            "node": "Build QA Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build QA Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI QA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI QA": {
+      "main": [
+        [
+          {
+            "node": "Parse QA Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse QA Report": {
+      "main": [
+        [
+          {
+            "node": "Save QA Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save QA Report": {
+      "main": [
+        [
+          {
+            "node": "Load Memory Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Memory Prompt": {
+      "main": [
+        [
+          {
+            "node": "Load Memory Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Memory Schema": {
+      "main": [
+        [
+          {
+            "node": "Build Memory Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Memory Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Memory": {
+      "main": [
+        [
+          {
+            "node": "Parse Memory Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Memory Update": {
+      "main": [
+        [
+          {
+            "node": "Save Memory Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Memory Update": {
       "main": [
         [
           {
