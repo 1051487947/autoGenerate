@@ -321,3 +321,28 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 测试 `book_id`：`kuaidi_dongshizhang_server_test`
   - 返回：`{"ok":true,"saved_path":"bible/story_seed.json"}`
   - 落盘文件：`/opt/autoGenerate/novel_projects/kuaidi_dongshizhang_server_test/bible/story_seed.json`
+
+## 2026-04-26 N8N Bootstrap 链路扩展到小说圣经与 20 章大纲
+
+- 已继续扩展 `Novel Seed - Bridge GPT MVP` workflow。
+- 当前链路：
+  - Webhook 输入标题。
+  - Bridge 初始化书籍项目。
+  - 读取 `01_seed_from_title.md` 和 `story_seed.schema.json`。
+  - GPT 生成并保存 `bible/story_seed.json`。
+  - 读取 `02_story_bible.md`。
+  - GPT 生成并保存 `bible/story_bible.md`。
+  - 读取 `03_outline_20.md` 和 `chapter_plan.schema.json`。
+  - GPT 生成并保存 `outline/chapters_20.json`。
+- Webhook 已改为 `responseMode=onReceived`，长任务会立即返回 `{"message":"Workflow was started"}`，实际结果以 N8N execution 和文件落盘为准。
+- 已测试 `book_id=kuaidi_dongshizhang_story_bible_test`：
+  - 执行成功。
+  - `bible/story_bible.md` 已落盘，大小约 27KB。
+- 已测试 `book_id=kuaidi_dongshizhang_outline_test`：
+  - 执行成功。
+  - `outline/chapters_20.json` 已落盘，包含 20 章。
+  - 前三章为：
+    - 第 1 章：`快递送进董事会`
+    - 第 2 章：`想辞职的人先被锁死`
+    - 第 3 章：`董事会不讲人话`
+- 当前下一步：基于 `chapters_20.json` 生成第 1 章任务单和场景卡，然后再接正文生成。

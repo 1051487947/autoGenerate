@@ -16,7 +16,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "novel-seed-bridge-gpt",
-        "responseMode": "lastNode",
+        "responseMode": "onReceived",
         "options": {}
       },
       "id": "webhook_trigger",
@@ -209,14 +209,259 @@
     },
     {
       "parameters": {
-        "jsCode": "const seed = $('Parse Story Seed').item.json;\nreturn [{ json: {\n  ok: true,\n  book_id: seed.book_id,\n  title: seed.title,\n  saved_path: 'bible/story_seed.json',\n  next_step: '生成 story_bible.md'\n} }];"
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/02_story_bible.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_story_bible_prompt",
+      "name": "Load Story Bible Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2464,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const seedNode = $('Parse Story Seed').item.json;\nconst promptTemplate = $json.content;\nconst storySeed = seedNode.story_seed;\nconst prompt = `${promptTemplate}\n\n请基于以下 story_seed 生成小说圣经。\nstory_seed：\n${JSON.stringify(storySeed, null, 2)}\n\n要求：\n1. 只输出 Markdown 正文。\n2. 标题层级清晰。\n3. 内容要能直接保存为 bible/story_bible.md。\n4. 不要输出代码块包裹。`;\nreturn [{ json: { ...seedNode, prompt } }];"
+      },
+      "id": "build_gpt_story_bible_request",
+      "name": "Build GPT Story Bible Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.35, messages: [ { role: 'system', content: '你是中文长篇类型小说架构师。请按要求输出可直接保存的 Markdown。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {}
+      },
+      "id": "openai_story_bible",
+      "name": "OpenAI Story Bible",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2976,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const seedNode = $('Build GPT Story Bible Request').item.json;\nlet response = $json;\nif (typeof response === 'string') {\n  try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n}\nif (typeof response.data === 'string') {\n  try { response = JSON.parse(response.data); } catch (err) {}\n}\nif (response.body && typeof response.body === 'string') {\n  try { response = JSON.parse(response.body); } catch (err) {}\n}\nlet markdown = response.choices?.[0]?.message?.content\n  || response.content?.[0]?.text\n  || response.output_text\n  || response.text\n  || response.data?.choices?.[0]?.message?.content\n  || '';\nmarkdown = String(markdown).trim();\nif (markdown.startsWith('```')) {\n  markdown = markdown.replace(/^```(?:markdown|md)?\\s*/i, '').replace(/```$/i, '').trim();\n}\nif (!markdown) throw new Error('Story bible markdown is empty');\nreturn [{ json: { ...seedNode, story_bible_markdown: markdown } }];"
+      },
+      "id": "parse_story_bible",
+      "name": "Parse Story Bible",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3232,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'bible/story_bible.md', content: $json.story_bible_markdown } }}",
+        "options": {}
+      },
+      "id": "save_story_bible",
+      "name": "Save Story Bible",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3488,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/prompts/03_outline_20.md'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_outline_prompt",
+      "name": "Load Outline Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3744,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/schemas/chapter_plan.schema.json'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "load_chapter_plan_schema",
+      "name": "Load Chapter Plan Schema",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4000,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const seedNode = $('Parse Story Seed').item.json;\nconst storyBible = $('Parse Story Bible').item.json.story_bible_markdown;\nconst promptTemplate = $('Load Outline Prompt').item.json.content;\nconst schema = $json.schema || $json;\nconst payload = {\n  story_bible: storyBible,\n  chapter_count: seedNode.chapter_count || 20,\n  target_words_per_chapter: seedNode.target_words_per_chapter || 2500\n};\nconst prompt = `${promptTemplate}\n\n请基于以下小说圣经生成 20 章大纲。\n输入：\n${JSON.stringify(payload, null, 2)}\n\n必须严格符合以下 JSON Schema，只输出 JSON，不要输出 Markdown 或解释：\n${JSON.stringify(schema, null, 2)}`;\nreturn [{ json: { ...seedNode, story_bible_markdown: storyBible, prompt } }];"
+      },
+      "id": "build_gpt_outline_request",
+      "name": "Build GPT Outline Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4256,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{'Bearer ' + $env.OPENAI_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.openai_model || $env.OPENAI_MODEL || 'gpt-5.4', temperature: 0.35, response_format: { type: 'json_object' }, messages: [ { role: 'system', content: '你是中文类型小说主编。你必须只输出合法 JSON。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {}
+      },
+      "id": "openai_outline_20",
+      "name": "OpenAI Outline 20",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4512,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Build GPT Outline Request').item.json;\nlet response = $json;\nif (typeof response === 'string') {\n  try { response = JSON.parse(response); } catch (err) { response = { data: response }; }\n}\nif (typeof response.data === 'string') {\n  try { response = JSON.parse(response.data); } catch (err) {}\n}\nif (response.body && typeof response.body === 'string') {\n  try { response = JSON.parse(response.body); } catch (err) {}\n}\nconst raw = response.choices?.[0]?.message?.content\n  || response.content?.[0]?.text\n  || response.output_text\n  || response.text\n  || response.data?.choices?.[0]?.message?.content\n  || '';\nlet txt = String(raw).trim();\nif (txt.startsWith('```')) {\n  txt = txt.replace(/^```(?:json)?\\s*/i, '').replace(/```$/i, '').trim();\n}\nconst s = txt.indexOf('{');\nconst e = txt.lastIndexOf('}');\nif (s !== -1 && e !== -1 && e > s) txt = txt.slice(s, e + 1);\nlet outline;\ntry {\n  outline = JSON.parse(txt);\n} catch (err) {\n  throw new Error('Outline JSON parse failed: ' + raw);\n}\nif (!Array.isArray(outline.chapters) || outline.chapters.length !== 20) {\n  throw new Error('Outline must contain exactly 20 chapters, got ' + (outline.chapters || []).length);\n}\nreturn [{ json: { ...source, outline_20: outline, outline_20_raw: raw } }];"
+      },
+      "id": "parse_outline_20",
+      "name": "Parse Outline 20",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4768,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.NOVEL_BRIDGE_URL || 'http://novel-bridge:8765') + '/api/books/' + $json.book_id + '/write'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Novel-Token",
+              "value": "={{$env.NOVEL_BRIDGE_TOKEN || ''}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { path: 'outline/chapters_20.json', content: $json.outline_20 } }}",
+        "options": {}
+      },
+      "id": "save_outline_20",
+      "name": "Save Outline 20",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5024,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const seed = $('Parse Story Seed').item.json;\nreturn [{ json: {\n  ok: true,\n  book_id: seed.book_id,\n  title: seed.title,\n  saved_paths: ['bible/story_seed.json', 'bible/story_bible.md', 'outline/chapters_20.json'],\n  next_step: '生成第 1 章任务单和场景卡'\n} }];"
       },
       "id": "done",
       "name": "Done",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2464,
+        5280,
         160
       ]
     }
@@ -323,6 +568,127 @@
       ]
     },
     "Save Story Seed": {
+      "main": [
+        [
+          {
+            "node": "Load Story Bible Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Story Bible Prompt": {
+      "main": [
+        [
+          {
+            "node": "Build GPT Story Bible Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build GPT Story Bible Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Story Bible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Story Bible": {
+      "main": [
+        [
+          {
+            "node": "Parse Story Bible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Story Bible": {
+      "main": [
+        [
+          {
+            "node": "Save Story Bible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Story Bible": {
+      "main": [
+        [
+          {
+            "node": "Load Outline Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Outline Prompt": {
+      "main": [
+        [
+          {
+            "node": "Load Chapter Plan Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Chapter Plan Schema": {
+      "main": [
+        [
+          {
+            "node": "Build GPT Outline Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build GPT Outline Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Outline 20",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Outline 20": {
+      "main": [
+        [
+          {
+            "node": "Parse Outline 20",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Outline 20": {
+      "main": [
+        [
+          {
+            "node": "Save Outline 20",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Outline 20": {
       "main": [
         [
           {
