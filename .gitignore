@@ -19,6 +19,7 @@ node_modules/
 
 # Logs and transient browser output
 *.log
+tmp_*.json
 .playwright-mcp/
 %SystemDrive%/
 NVIDIA Corporation/

@@ -248,3 +248,20 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 用途：先跑通标题 -> Bridge 初始化项目 -> 读取 Prompt/Schema -> GPT 生成 `story_seed.json` -> Bridge 写回。
   - 该 workflow 不替换服务器上的旧 workflow，适合作为 V2 冒烟链路导入测试。
 - 已新增升级说明：`novel_factory/n8n/existing-workflow-upgrade-notes.md`。
+
+## 2026-04-26 服务器 Novel Bridge 部署配置
+
+- 已通过 N8N 后端确认服务器当前有两个 workflow：
+  - `ZfOcpJ2nHvEzjuos`：`小说工作流`，inactive，旧架构。
+  - `CyRqZLtMyPxdOkpE`：`Novel Seed - Bridge GPT MVP`，inactive，新建 UTF-8 正常导入版。
+- 曾首次导入 `YtUMjV7MPeqULw7n`，发现 PowerShell 默认提交导致中文变问号，已删除后用显式 UTF-8 重新导入。
+- 公网访问 `http://8.140.56.75:8765/health` 超时，说明 Novel Bridge 尚未部署或未对外暴露。推荐 Bridge 只在 Docker 内网给 N8N 访问，不需要公网暴露。
+- 已新增部署参考：
+  - `novel_factory/deploy/docker-compose.novel-bridge.example.yml`
+  - `novel_factory/deploy/server-deploy.md`
+- 服务器侧下一步需要在 N8N Docker Compose 同机部署 `novel-bridge`，并给 N8N 容器增加环境变量：
+  - `NOVEL_BRIDGE_URL=http://novel-bridge:8765`
+  - `NOVEL_BRIDGE_TOKEN`
+  - `OPENAI_BASE_URL`
+  - `OPENAI_API_KEY`
+  - `OPENAI_MODEL=gpt-4o`

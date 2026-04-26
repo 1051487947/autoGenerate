@@ -1,0 +1,26 @@
+services:
+  novel-bridge:
+    image: python:3.11-slim
+    container_name: novel-bridge
+    working_dir: /workspace
+    command: >
+      python novel_factory/scripts/novel_bridge.py
+      --host 0.0.0.0
+      --port 8765
+      --token ${NOVEL_BRIDGE_TOKEN}
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - /opt/autoGenerate:/workspace
+    restart: unless-stopped
+
+  n8n-cn:
+    environment:
+      NOVEL_BRIDGE_URL: http://novel-bridge:8765
+      NOVEL_BRIDGE_TOKEN: ${NOVEL_BRIDGE_TOKEN}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+    depends_on:
+      - novel-bridge
+
