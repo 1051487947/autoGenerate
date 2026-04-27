@@ -594,3 +594,17 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
 - 估算建议：
   - 按当前串行配置，单章预算按 `10分钟` 估比较稳。
   - 20 章完整原稿预算按 `3小时15分钟` 到 `3小时30分钟` 比较稳。
+
+## 2026-04-27 系统架构文档
+
+- 已新增完整架构文档：`docs/novel-system-architecture.md`。
+- 文档内容覆盖：
+  - 当前总体定位：N8N 编排、Novel Bridge 文件网关、`novel_factory` 工程资产、`novel_projects` 产物、GitHub 版本管理。
+  - 服务器部署结构：`n8n-cn`、`novel-bridge`、`/opt/autoGenerate`、`/opt/n8n-cn`。
+  - 当前 N8N workflow：
+    - `小说工作流`：旧流程，inactive。
+    - `Novel Seed - Bridge GPT MVP`：早期第 1 章硬编码 MVP，active，可做备份参考。
+    - `Novel Book Loop MVP`：当前主流程，active。
+    - `Novel Single Chapter Worker`：单章子流程，inactive 但可被主流程调用。
+  - 标题到 20 章的主链路：标题 -> 故事种子 -> 小说圣经 -> 20 章大纲 -> 逐章 Worker -> 场景正文 -> 合章 -> QA -> 记忆回写 -> 合订本。
+  - 当前限制和下一阶段建议：QA 归一化、自动精修、合订本节点化、Kimi 接入、记忆系统增强、人工审核节点。
