@@ -728,6 +728,9 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 3 章测试书：`http://8.140.56.75:18088/books/v02_3ch_smoke_20260501_1935/index.html`
   - 20 章完整书：`http://8.140.56.75:18088/books/full20_retry_20260426_232722/index.html`
 - 已新增部署文档：`docs/novel-reader-site-deployment.md`。
+  - 2026-05-01 追加修复：`build_reader_site.py` 改为只清空输出目录内容、保留 `novel_reader_site` 目录本身，避免 Nginx bind mount 因目录被删除重建而出现 403/404。
+  - 已生成 `assets/favicon.svg` 和根目录 `favicon.ico`，浏览器访问首页无资源 404。
+  - 已在服务器验证连续重建后首页、favicon、20 章书籍页仍返回 200。
   - 当前 N8N workflow：
     - `小说工作流`：旧流程，inactive。
     - `Novel Seed - Bridge GPT MVP`：早期第 1 章硬编码 MVP，active，可做备份参考。

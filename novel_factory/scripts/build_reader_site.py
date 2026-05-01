@@ -3,6 +3,7 @@ import html
 import json
 import re
 import shutil
+import struct
 from datetime import datetime
 from pathlib import Path
 
@@ -19,6 +20,15 @@ def read_json(path: Path, default):
         return json.loads(path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError):
         return default
+
+
+def reset_output_dir(output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for child in output_dir.iterdir():
+        if child.is_dir() and not child.is_symlink():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
 
 
 def safe_slug(text: str) -> str:
@@ -281,6 +291,55 @@ a { color: inherit; text-decoration: none; }
 """
 
 
+def favicon_svg() -> str:
+    return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#4d2b1d"/>
+  <path d="M18 16h20c5 0 8 3 8 8v24H24c-4 0-6-2-6-6V16Z" fill="#f7f0e4"/>
+  <path d="M24 24h16M24 31h14M24 38h12" stroke="#8f4d2f" stroke-width="3" stroke-linecap="round"/>
+</svg>
+"""
+
+
+def favicon_ico() -> bytes:
+    size = 32
+    pixels = []
+    for y in range(size):
+        for x in range(size):
+            if 8 <= x <= 23 and 7 <= y <= 25:
+                color = (0xF7, 0xF0, 0xE4, 0xFF)
+            elif 11 <= x <= 22 and y in (13, 17, 21):
+                color = (0x8F, 0x4D, 0x2F, 0xFF)
+            else:
+                color = (0x4D, 0x2B, 0x1D, 0xFF)
+            r, g, b, a = color
+            pixels.append(bytes((b, g, r, a)))
+
+    rows = []
+    for row in range(size - 1, -1, -1):
+        start = row * size
+        rows.append(b"".join(pixels[start:start + size]))
+
+    and_mask = b"\x00" * (size * 4)
+    dib = struct.pack(
+        "<IIIHHIIIIII",
+        40,
+        size,
+        size * 2,
+        1,
+        32,
+        0,
+        size * size * 4,
+        0,
+        0,
+        0,
+        0,
+    ) + b"".join(rows) + and_mask
+
+    header = struct.pack("<HHH", 0, 1, 1)
+    entry = struct.pack("<BBBBHHII", size, size, 0, 0, 1, 32, len(dib), 22)
+    return header + entry + dib
+
+
 def page(title: str, body: str, root_prefix: str = "") -> str:
     return f"""<!doctype html>
 <html lang="zh-CN">
@@ -288,6 +347,7 @@ def page(title: str, body: str, root_prefix: str = "") -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title)}</title>
+  <link rel="icon" href="{root_prefix}assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="{root_prefix}assets/site.css">
 </head>
 <body>
@@ -374,11 +434,12 @@ def build_book(book, output_dir: Path) -> None:
 
 
 def build_site(projects_dir: Path, output_dir: Path) -> None:
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
+    reset_output_dir(output_dir)
     (output_dir / "assets").mkdir(parents=True, exist_ok=True)
     (output_dir / "books").mkdir(parents=True, exist_ok=True)
     (output_dir / "assets" / "site.css").write_text(site_css(), encoding="utf-8")
+    (output_dir / "assets" / "favicon.svg").write_text(favicon_svg(), encoding="utf-8")
+    (output_dir / "favicon.ico").write_bytes(favicon_ico())
 
     books = discover_books(projects_dir)
     for book in books:
