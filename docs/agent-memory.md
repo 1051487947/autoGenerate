@@ -692,6 +692,24 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 可读取 `characters.schema.json`。
   - `/api/books/init` 创建测试书后能生成 `bible/golden_finger.json`、`memory/causality_ledger.json`、`bible/style_bible.md`。
   - 测试书 `server_v02_smoke_test` 已清理。
+
+## 2026-05-01 V0.2 三章生成 Smoke Test
+
+- 先触发过一次 `v02_3ch_smoke_20260501_1850`，由于本地 shell 脚本用 ASCII 写入请求，中文标题变成 `???????????????`，导致模型生成成悬疑档案题材；该错误测试目录已清理。
+- 已改用 UTF-8 JSON 请求文件重新触发：
+  - `book_id`: `v02_3ch_smoke_20260501_1935`
+  - 标题：`我要送快递可是你非要我做董事长`
+  - 主流程 execution：`52`，success。
+  - 单章 worker：`53`、`54`、`55`，均 success。
+- 生成结果已同步到本地：`novel_projects/v02_3ch_smoke_20260501_1935`。
+- 三章结果：
+  - 第 1 章：`骑手进董事会`，5634 字符，QA `89`，`major_conflict=false`，`needs_rewrite=true`，`needs_manual_review=true`。
+  - 第 2 章：`PPT里一切正常`，4656 字符，QA `91`，`major_conflict=false`，`needs_rewrite=false`，`needs_manual_review=false`。
+  - 第 3 章：`董事长下仓`，4484 字符，QA `91`，`major_conflict=false`，`needs_rewrite=true`，`needs_manual_review=true`。
+- 结论：
+  - V0.2 资产层没有破坏原有 3 章生成链路。
+  - 当前 N8N workflow 尚未接入 V0.2 的人物卡、金手指、风格圣经、因果规划、伏笔规划、去 AI 审计、风格审计节点，因此这些文件目前仍是占位或未参与生成。
+  - QA 仍偏保守，高分无重大冲突章节仍可能被标为 rewrite/manual，需要下一步做 QA 归一化。
   - 当前 N8N workflow：
     - `小说工作流`：旧流程，inactive。
     - `Novel Seed - Bridge GPT MVP`：早期第 1 章硬编码 MVP，active，可做备份参考。

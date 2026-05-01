@@ -154,3 +154,43 @@ novel_projects/v02_landing_test
    - `Style Consistency Auditor`
 
 先跑 1 章和 3 章验证，再决定是否把 `Anti-AI Audit` 接入强制 QA Gate。
+
+## 3 章 Smoke Test
+
+2026-05-01 已执行一次正确 UTF-8 请求的 3 章生成：
+
+```text
+book_id: v02_3ch_smoke_20260501_1935
+title: 我要送快递可是你非要我做董事长
+```
+
+执行结果：
+
+- 主流程 execution：`52`，success。
+- 单章 Worker：
+  - `53`：第 1 章，success。
+  - `54`：第 2 章，success。
+  - `55`：第 3 章，success。
+- 服务器目录：`/opt/autoGenerate/novel_projects/v02_3ch_smoke_20260501_1935`
+- 本地已同步：`novel_projects/v02_3ch_smoke_20260501_1935`
+
+章节结果：
+
+| 章节 | 标题 | 字符数 | QA 总分 | major_conflict | needs_rewrite | needs_manual_review |
+| --- | --- | ---: | ---: | --- | --- | --- |
+| 1 | 骑手进董事会 | 5634 | 89 | false | true | true |
+| 2 | PPT里一切正常 | 4656 | 91 | false | false | false |
+| 3 | 董事长下仓 | 4484 | 91 | false | true | true |
+
+观察：
+
+- UTF-8 请求后，标题、题材、核心钩子均正确落入“快递骑手被推上董事长”的方向。
+- 原有 3 章循环未被 V0.2 资产层破坏。
+- QA 仍存在此前问题：高分且无重大冲突时仍可能标记 `needs_rewrite=true`、`needs_manual_review=true`。
+- V0.2 的新文件已经初始化，但当前 N8N workflow 还没有生成/使用人物卡、金手指、风格圣经、因果规划、伏笔规划、去 AI 审计、风格审计等节点。
+
+过程问题：
+
+- 第一次测试使用 ASCII shell 脚本触发 webhook，中文标题被写成 `???????????????`，导致模型按未知标题生成了悬疑档案题材。
+- 错误测试项目 `v02_3ch_smoke_20260501_1850` 已清理。
+- 后续触发含中文的 N8N webhook，必须使用 UTF-8 请求文件或 JSON unicode escape，不能用 ASCII 写 shell 内嵌中文。
