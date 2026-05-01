@@ -683,6 +683,15 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
 - 已升级 `novel_factory/scripts/init_book_project.py`，新书初始化会创建人物卡、金手指、文风圣经、反 AI 词表、长期账本和审计汇总文件。
 - 已用 `C:\Python311\python.exe` 初始化测试项目 `v02_landing_test`，并验证新增 Schema 和项目 JSON 文件均可正常解析。
 - 验证项目目录：`novel_projects/v02_landing_test` 和 `novel_projects/v02_landing_test_2`，均已生成人物卡、金手指、文风圣经、反 AI 词表和长期记忆账本占位文件；验证后已清理测试目录，不作为版本产物保留。
+- 已提交并推送 GitHub：`7678d40 add novel factory v0.2 assets`。
+- 已同步服务器 `/opt/autoGenerate` 的 `docs` 和 `novel_factory` 目录。
+- 服务器直接 `git pull --ff-only` 被 `novel_projects/full20_retry_20260426_232722` 等未跟踪生成产物阻止；为避免覆盖生成内容，本次改用 `git fetch` 后按目录检出 `docs` 和 `novel_factory`。
+- 已重启 `novel-bridge` 容器，确保 `/api/books/init` 加载新版初始化脚本。
+- 服务器 Bridge 验证通过：
+  - 可读取 `10_character_cards.md`、`17_style_consistency_auditor.md`。
+  - 可读取 `characters.schema.json`。
+  - `/api/books/init` 创建测试书后能生成 `bible/golden_finger.json`、`memory/causality_ledger.json`、`bible/style_bible.md`。
+  - 测试书 `server_v02_smoke_test` 已清理。
   - 当前 N8N workflow：
     - `小说工作流`：旧流程，inactive。
     - `Novel Seed - Bridge GPT MVP`：早期第 1 章硬编码 MVP，active，可做备份参考。

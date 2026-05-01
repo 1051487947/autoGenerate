@@ -106,6 +106,37 @@ novel_projects/v02_landing_test
 - 初始化出的项目内所有 JSON 文件均可被解析。
 - `README.md` 中已包含 V0.2 生成顺序和长期账本说明。
 
+## 服务器同步
+
+2026-05-01 已同步到服务器：
+
+```text
+/opt/autoGenerate
+```
+
+同步方式：
+
+- 本地提交：`7678d40 add novel factory v0.2 assets`
+- 已推送到 GitHub `main`
+- 服务器从 `origin/main` 检出 `docs` 和 `novel_factory`
+
+说明：
+
+- 服务器 `/opt/autoGenerate/novel_projects` 下已有大量生成产物，直接 `git pull --ff-only` 会被未跟踪产物保护机制拦截。
+- 本次只更新 `docs` 和 `novel_factory`，没有删除或覆盖服务器已有小说生成产物。
+- 已重启 `novel-bridge` 容器，让 `/api/books/init` 重新加载新版 `init_book_project.py`。
+
+服务器验证：
+
+- Bridge 可读取 `10_character_cards.md`。
+- Bridge 可读取 `characters.schema.json`。
+- Bridge 可读取 `17_style_consistency_auditor.md`。
+- 通过 `POST /api/books/init` 创建测试书后，已确认会生成：
+  - `bible/golden_finger.json`
+  - `memory/causality_ledger.json`
+  - `bible/style_bible.md`
+- 测试项目 `server_v02_smoke_test` 验证后已删除。
+
 ## 下一步
 
 下一阶段再改 N8N 工作流，建议分两步：
