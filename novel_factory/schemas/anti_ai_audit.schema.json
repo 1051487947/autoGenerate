@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AntiAIAudit",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "logic_ai_risk",
+    "dialogue_ai_risk",
+    "phrase_ai_risk",
+    "structure_ai_risk",
+    "overall_risk",
+    "flagged_patterns",
+    "direct_tells",
+    "repetitive_phrases",
+    "recommended_rewrites",
+    "needs_rewrite",
+    "needs_manual_review"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "logic_ai_risk": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "dialogue_ai_risk": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "phrase_ai_risk": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "structure_ai_risk": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "overall_risk": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "flagged_patterns": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "direct_tells": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "repetitive_phrases": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "recommended_rewrites": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "needs_rewrite": { "type": "boolean" },
+    "needs_manual_review": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

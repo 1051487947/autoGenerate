@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CausalityPlan",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "why_this_event_happens_now",
+    "who_benefits",
+    "who_pays_cost",
+    "what_information_is_missing",
+    "what_mistake_protagonist_makes",
+    "required_preconditions",
+    "blocked_alternatives"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "why_this_event_happens_now": { "type": "string" },
+    "who_benefits": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "who_pays_cost": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "what_information_is_missing": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "what_mistake_protagonist_makes": { "type": "string" },
+    "required_preconditions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "blocked_alternatives": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -51,13 +51,67 @@ def build_project(root: Path, title: str, book_id: str, chapter_count: int) -> P
 
     write_json(project_dir / "bible" / "story_seed.json", {})
     write_text(project_dir / "bible" / "story_bible.md", f"# {title}\n\n> 待由 `02_story_bible` 生成。\n")
-    write_json(project_dir / "bible" / "characters.json", {"characters": []})
+    write_json(project_dir / "bible" / "characters.json", {"book_title": title, "characters": []})
+    write_json(project_dir / "bible" / "golden_finger.json", {
+        "name": "",
+        "type": "",
+        "origin": "",
+        "activation_condition": "",
+        "visible_effect": "",
+        "true_mechanism": "",
+        "limitations": [],
+        "costs": [],
+        "failure_modes": [],
+        "growth_stages": [],
+        "misuse_risks": [],
+        "anti_deus_ex_machina_rules": [],
+    })
+    write_json(project_dir / "bible" / "reader_promise.json", {
+        "book_title": title,
+        "promises": [],
+        "must_deliver_every_chapter": [],
+        "must_not_break": [],
+    })
     write_json(project_dir / "bible" / "foreshadowing.json", {"items": []})
+    write_text(project_dir / "bible" / "style_bible.md", f"# {title} 文风圣经\n\n> 待由 `12_style_bible` 生成。\n")
+    write_json(project_dir / "bible" / "voice_fingerprint.json", {
+        "source_name": "",
+        "average_sentence_length": 0,
+        "sentence_length_variance": 0,
+        "short_sentence_ratio": 0,
+        "dialogue_ratio": 0,
+        "paragraph_length_profile": [],
+        "high_frequency_verbs": [],
+        "high_frequency_particles": [],
+        "preferred_punctuation": [],
+        "metaphor_density": 0,
+        "psychology_to_action_ratio": 0,
+        "style_anchor_notes": [],
+    })
+    write_json(project_dir / "bible" / "anti_ai_phrasebook.zh.json", {
+        "summary_phrases": ["显然", "毫无疑问", "不可否认", "归根结底", "某种意义上"],
+        "emotion_cliches": ["空气仿佛凝固", "眼神复杂", "沉默良久", "心头一震", "嘴角勾起"],
+        "explanation_cliches": ["他终于明白", "他意识到", "这意味着", "这不仅是"],
+        "structure_cliches": ["不是因为", "而是因为", "与其说", "不如说"],
+        "usage_note": "先用于审计和扣分，不做绝对禁用。",
+    })
     write_json(project_dir / "outline" / "chapters_20.json", {"book_title": title, "chapter_count": chapter_count, "chapters": []})
     write_json(project_dir / "memory" / "chapter_summaries.json", {"chapters": []})
     write_json(project_dir / "memory" / "state_memory.json", {"characters": [], "locations": [], "organizations": [], "must_remember": []})
+    write_json(project_dir / "memory" / "foreshadow_ledger.json", {"items": []})
+    write_json(project_dir / "memory" / "character_arc_ledger.json", {"characters": []})
+    write_json(project_dir / "memory" / "causality_ledger.json", {"events": []})
+    write_json(project_dir / "memory" / "golden_finger_ledger.json", {"history": []})
+    write_json(project_dir / "memory" / "pressure_ledger.json", {"items": []})
+    write_json(project_dir / "memory" / "knowledge_state_ledger.json", {"items": []})
+    write_json(project_dir / "memory" / "antagonist_move_ledger.json", {"moves": []})
+    write_json(project_dir / "memory" / "hook_ledger.json", {"items": []})
     write_text(project_dir / "memory" / "continuity_notes.md", "# 连续性记录\n\n")
     write_json(project_dir / "review" / "qa_report.json", {"chapters": []})
+    write_json(project_dir / "review" / "anti_ai_report.json", {"chapters": []})
+    write_json(project_dir / "review" / "style_report.json", {"chapters": []})
+    write_json(project_dir / "review" / "logic_report.json", {"chapters": []})
+    write_json(project_dir / "review" / "foreshadow_report.json", {"chapters": []})
     write_text(project_dir / "export" / "full_book.md", f"# {title}\n\n")
 
     readme = f"""# {title}
@@ -68,19 +122,30 @@ book_id: `{book_id}`
 
 1. 用 `01_seed_from_title` 生成 `bible/story_seed.json`。
 2. 用 `02_story_bible` 生成 `bible/story_bible.md`。
-3. 用 `03_outline_20` 生成 `outline/chapters_20.json`。
-4. 按章节循环生成：
+3. 用 `10_character_cards` 生成 `bible/characters.json`。
+4. 用 `11_golden_finger` 生成 `bible/golden_finger.json`。
+5. 用 `12_style_bible` 生成 `bible/style_bible.md`。
+6. 用 `13_voice_fingerprint` 生成 `bible/voice_fingerprint.json`。
+7. 用 `03_outline_20` 生成 `outline/chapters_20.json`。
+8. 按章节循环生成：
+   - `review/ch001.logic.json`
+   - `review/ch001.foreshadow.json`
    - `chapter_tasks/ch001.task.json`
    - `scenes/ch001.scenes.json`
    - `scenes/ch001_scene01.md`
    - `chapters/ch001.md`
+   - `review/ch001.anti_ai.json`
    - `review/ch001.qa.json`
    - `memory/ch001.memory.json`
-5. 最后合并到 `export/full_book.md`。
+9. 回写长期账本：
+   - `memory/foreshadow_ledger.json`
+   - `memory/character_arc_ledger.json`
+   - `memory/causality_ledger.json`
+10. 最后合并到 `export/full_book.md`。
 
 ## 当前状态
 
-项目骨架已初始化，等待 AI 工作流填充内容。
+项目骨架已初始化，等待 AI 工作流填充内容。V0.2 已包含人物卡、金手指、风格圣经、反 AI 词表和长期记忆账本占位。
 """
     write_text(project_dir / "README.md", readme)
     return project_dir

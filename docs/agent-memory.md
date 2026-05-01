@@ -601,6 +601,88 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
 - 文档内容覆盖：
   - 当前总体定位：N8N 编排、Novel Bridge 文件网关、`novel_factory` 工程资产、`novel_projects` 产物、GitHub 版本管理。
   - 服务器部署结构：`n8n-cn`、`novel-bridge`、`/opt/autoGenerate`、`/opt/n8n-cn`。
+
+## 2026-04-27 小说生成架构问题复盘
+
+- 用户要求检查此前生成过程中暴露出的架构性问题。
+- 已新增复盘文档：`docs/novel-architecture-issues-review.md`。
+- 核心结论：
+  - 历史上主要问题包括：旧流程硬编码第 1 章、全局静态状态容易串数据、KodBox 不适合做过程版本库、n8n Code 节点换行转义错误、场景正文并发触发模型网关 429、长文本生成遇到 502、`.item` 多 item 链接错误、合订本 UTF-8 合并风险。
+  - 当前 20 章完整原稿已经跑通，主流程架构成立。
+  - 仍需补强：QA 归一化、自动精修闭环、强状态机记忆、RAG/检索、Kimi 写作模型接入、合订本 N8N 节点化、关键剧情人工审核。
+
+## 2026-04-27 长期故事记忆与去 AI 味优化方向
+
+- 用户补充关键判断：后续优化 N8N 不应只新增“AI 润色节点”，而要增加长期故事记忆层。
+- 已沉淀方案文档：`docs/n8n-novel-logic-humanization-foreshadowing.md`。
+- 核心改造：
+  - 新增 `memory/foreshadow_ledger.json`、`memory/character_arc_ledger.json`、`memory/causality_ledger.json` 三类账本。
+  - 章节循环新增 `Foreshadow Planner`、`Logic Causality Planner`、`Logic Humanization Auditor`、`Foreshadow Auditor`、`Foreshadow Ledger Update`。
+  - QA Gate 新增硬规则：`logic_ai_risk <= 45`、`foreshadow_score >= 75`、最近 3 章至少 1 个中伏笔、最近 6 章至少回收 1 个伏笔、主角不能连续 3 章全程判断正确、章末钩子类型不能连续 3 章相同。
+  - 最关键节点是 `Logic Causality Planner`，每章生成前必须明确“为什么这事现在发生、谁获利、谁付代价、缺什么信息、主角犯什么错”。
+- 后续优化路线：
+  - 先补账本 Schema 和初始化模板。
+  - 再改 `Build Chapter Context`，让三类账本进入章节输入。
+  - 然后加入生成前规划器和生成后审计器。
+  - 最后再做 Kimi、RAG、自动精修和人工审核节点。
+
+## 2026-05-01 人物卡与金手指建模确认
+
+- 用户追问当前整体设计是否已有人物卡和金手指。
+- 当前判断：
+  - 已有人物卡雏形，但没有独立的人物卡系统。
+  - 金手指目前藏在 `story_seed`、`story_bible` 和章节爽点机制里，还没有独立建模。
+- 已补充方案文档：`docs/n8n-novel-logic-humanization-foreshadowing.md`。
+- 建议后续新增：
+  - `character_card.schema.json`
+  - `bible/golden_finger.json`
+  - `memory/golden_finger_ledger.json`
+  - 人物卡和金手指都要进入 `Build Chapter Context`
+
+## 2026-05-01 中长篇小说系统扩展设计调研
+
+- 用户要求从中长篇小说专家、GitHub 开源项目、去 AI 化、文风一致性、AI 观念和措辞规避几个角度继续扩展设计。
+- 已新增文档：`docs/novel-system-expanded-design-considerations.md`。
+- 调研参考的公开项目包括：
+  - `NousResearch/autonovel`
+  - `RhythmicWave/NovelForge`
+  - `iLearn-Lab/NovelClaw`
+  - `forsonny/book-os`
+  - `LewdLeah/Auto-Cards`
+  - `bal-spec/sillytavern-character-memory`
+  - `pixelnull/sillytavern-DeepLore-Enhanced`
+  - `principia-ai/WriteHERE`
+  - `sam-paech/slop-forensics`
+  - `EQ-Bench/creative-writing-bench`
+- 新增建议方向：
+  - 读者承诺账本、压力账本、信息差账本、反派行动账本、场景功能账本、章末钩子账本。
+  - 去 AI 化增加 `Friction Planner`、`Dialogue Humanization Auditor`、`Anti-AI Phrase Auditor`。
+  - 文风一致性增加 `style_bible.md`、`voice_fingerprint.json`、`review/chXXX.style.json`。
+
+## 2026-05-01 小说工厂 V0.2 落地
+
+- 用户确认不再继续大范围分析，先落地一个版本。
+- 已新增 V0.2 实现文档：`docs/novel-v0.2-implementation.md`。
+- 已新增 Prompt：
+  - `10_character_cards.md`
+  - `11_golden_finger.md`
+  - `12_style_bible.md`
+  - `13_voice_fingerprint.md`
+  - `14_logic_causality_planner.md`
+  - `15_foreshadow_planner.md`
+  - `16_anti_ai_audit.md`
+  - `17_style_consistency_auditor.md`
+- 已新增 Schema：
+  - `characters.schema.json`
+  - `golden_finger.schema.json`
+  - `foreshadow_plan.schema.json`
+  - `causality_plan.schema.json`
+  - `voice_fingerprint.schema.json`
+  - `anti_ai_audit.schema.json`
+  - `style_audit.schema.json`
+- 已升级 `novel_factory/scripts/init_book_project.py`，新书初始化会创建人物卡、金手指、文风圣经、反 AI 词表、长期账本和审计汇总文件。
+- 已用 `C:\Python311\python.exe` 初始化测试项目 `v02_landing_test`，并验证新增 Schema 和项目 JSON 文件均可正常解析。
+- 验证项目目录：`novel_projects/v02_landing_test` 和 `novel_projects/v02_landing_test_2`，均已生成人物卡、金手指、文风圣经、反 AI 词表和长期记忆账本占位文件；验证后已清理测试目录，不作为版本产物保留。
   - 当前 N8N workflow：
     - `小说工作流`：旧流程，inactive。
     - `Novel Seed - Bridge GPT MVP`：早期第 1 章硬编码 MVP，active，可做备份参考。

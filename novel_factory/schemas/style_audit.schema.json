@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StyleAudit",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "style_drift_score",
+    "voice_match_score",
+    "sentence_pattern_score",
+    "dialogue_voice_score",
+    "overall_score",
+    "mismatches",
+    "repetitive_patterns",
+    "anchor_hits",
+    "recommended_adjustments",
+    "needs_rewrite",
+    "needs_manual_review"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "style_drift_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "voice_match_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "sentence_pattern_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "dialogue_voice_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "overall_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "mismatches": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "repetitive_patterns": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "anchor_hits": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "recommended_adjustments": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "needs_rewrite": { "type": "boolean" },
+    "needs_manual_review": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ForeshadowPlan",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "must_seed",
+    "must_reinforce",
+    "must_payoff",
+    "new_question",
+    "forbidden_reveals",
+    "hook_type"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "must_seed": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "must_reinforce": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "must_payoff": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "new_question": { "type": "string" },
+    "forbidden_reveals": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "hook_type": { "type": "string" }
+  },
+  "additionalProperties": false
+}

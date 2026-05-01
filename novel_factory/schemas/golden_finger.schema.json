@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GoldenFinger",
+  "type": "object",
+  "required": [
+    "name",
+    "type",
+    "origin",
+    "activation_condition",
+    "visible_effect",
+    "true_mechanism",
+    "limitations",
+    "costs",
+    "failure_modes",
+    "growth_stages",
+    "misuse_risks",
+    "anti_deus_ex_machina_rules"
+  ],
+  "properties": {
+    "name": { "type": "string" },
+    "type": { "type": "string" },
+    "origin": { "type": "string" },
+    "activation_condition": { "type": "string" },
+    "visible_effect": { "type": "string" },
+    "true_mechanism": { "type": "string" },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "costs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "growth_stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stage", "trigger", "effect"],
+        "properties": {
+          "stage": { "type": "string" },
+          "trigger": { "type": "string" },
+          "effect": { "type": "string" },
+          "cost": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "misuse_risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "anti_deus_ex_machina_rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -12,17 +12,33 @@ Webhook / Manual Trigger
   -> Save Story Seed
   -> GPT Story Bible
   -> Save Story Bible
+  -> GPT Character Cards
+  -> Save Characters
+  -> GPT Golden Finger
+  -> Save Golden Finger
+  -> GPT Style Bible
+  -> Save Style Bible
+  -> GPT Voice Fingerprint
+  -> Save Voice Fingerprint
   -> GPT Outline 20
   -> Validate Outline
   -> Save Outline
   -> Split Chapters
       -> Build Chapter Context
+      -> GPT Logic Causality Planner
+      -> Save Logic Plan
+      -> GPT Foreshadow Planner
+      -> Save Foreshadow Plan
       -> GPT Chapter Task
       -> GPT Scene Cards
       -> Split Scenes
           -> Kimi Scene Writer
       -> Collect Scenes
       -> Kimi/GPT Chapter Editor
+      -> GPT Anti-AI Audit
+      -> Save Anti-AI Audit
+      -> GPT Style Consistency Auditor
+      -> Save Style Audit
       -> GPT Critic Auditor
       -> QA Gate
           -> Pass: Archive Chapter
@@ -68,9 +84,49 @@ Webhook / Manual Trigger
     "recent_summaries": [],
     "active_characters": [],
     "active_foreshadowing": [],
-    "must_remember": []
+    "must_remember": [],
+    "character_arc_ledger": {},
+    "causality_ledger": {},
+    "hook_ledger": {}
+  },
+  "bible_assets": {
+    "characters": {},
+    "golden_finger": {},
+    "style_bible": "",
+    "voice_fingerprint": {},
+    "anti_ai_phrasebook": {}
   }
 }
+```
+
+### V0.2 新增文件
+
+书籍级：
+
+```text
+bible/characters.json
+bible/golden_finger.json
+bible/style_bible.md
+bible/voice_fingerprint.json
+bible/anti_ai_phrasebook.zh.json
+```
+
+章节级：
+
+```text
+review/ch001.logic.json
+review/ch001.foreshadow.json
+review/ch001.anti_ai.json
+```
+
+长期账本：
+
+```text
+memory/foreshadow_ledger.json
+memory/character_arc_ledger.json
+memory/causality_ledger.json
+memory/golden_finger_ledger.json
+memory/hook_ledger.json
 ```
 
 ### QA Gate
@@ -91,6 +147,10 @@ chapter_tasks/ch001.task.json
 scenes/ch001.scenes.json
 scenes/ch001_scene01.md
 chapters/ch001.md
+review/ch001.logic.json
+review/ch001.foreshadow.json
+review/ch001.anti_ai.json
+review/ch001.style.json
 review/ch001.qa.json
 memory/ch001.memory.json
 ```
@@ -102,4 +162,3 @@ memory/ch001.memory.json
 - HTTP Request 归档节点不要吞掉原始章节正文。
 - 归档前先 `Collect Chapter`，再调用外部归档接口。
 - GPT 输出必须先校验 JSON，再进入下游节点。
-

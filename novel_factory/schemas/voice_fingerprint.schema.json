@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VoiceFingerprint",
+  "type": "object",
+  "required": [
+    "source_name",
+    "average_sentence_length",
+    "sentence_length_variance",
+    "short_sentence_ratio",
+    "dialogue_ratio",
+    "paragraph_length_profile",
+    "high_frequency_verbs",
+    "high_frequency_particles",
+    "preferred_punctuation",
+    "metaphor_density",
+    "psychology_to_action_ratio",
+    "style_anchor_notes"
+  ],
+  "properties": {
+    "source_name": { "type": "string" },
+    "average_sentence_length": { "type": "number" },
+    "sentence_length_variance": { "type": "number" },
+    "short_sentence_ratio": { "type": "number" },
+    "dialogue_ratio": { "type": "number" },
+    "paragraph_length_profile": {
+      "type": "array",
+      "items": { "type": "number" }
+    },
+    "high_frequency_verbs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "high_frequency_particles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "preferred_punctuation": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "metaphor_density": { "type": "number" },
+    "psychology_to_action_ratio": { "type": "number" },
+    "style_anchor_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
