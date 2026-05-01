@@ -710,6 +710,24 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - V0.2 资产层没有破坏原有 3 章生成链路。
   - 当前 N8N workflow 尚未接入 V0.2 的人物卡、金手指、风格圣经、因果规划、伏笔规划、去 AI 审计、风格审计节点，因此这些文件目前仍是占位或未参与生成。
   - QA 仍偏保守，高分无重大冲突章节仍可能被标为 rewrite/manual，需要下一步做 QA 归一化。
+
+## 2026-05-01 小说阅读站部署
+
+- 用户要求小说生成后能在服务器部署阅读网站，并返回外网 URL；每本书一个目录，方便以后切换阅读。
+- 已新增静态站构建脚本：`novel_factory/scripts/build_reader_site.py`。
+- 已在服务器生成静态站目录：`/opt/autoGenerate/novel_reader_site`。
+- 已启动 Nginx 容器：
+  - 容器名：`novel-reader`
+  - 镜像：`nginx:alpine`
+  - 端口：`18088 -> 80`
+  - 数据卷：`/opt/autoGenerate/novel_reader_site:/usr/share/nginx/html:ro`
+  - 重启策略：`unless-stopped`
+- 已开放防火墙端口：`18088/tcp`。
+- 外网验证通过：
+  - 首页：`http://8.140.56.75:18088/`
+  - 3 章测试书：`http://8.140.56.75:18088/books/v02_3ch_smoke_20260501_1935/index.html`
+  - 20 章完整书：`http://8.140.56.75:18088/books/full20_retry_20260426_232722/index.html`
+- 已新增部署文档：`docs/novel-reader-site-deployment.md`。
   - 当前 N8N workflow：
     - `小说工作流`：旧流程，inactive。
     - `Novel Seed - Bridge GPT MVP`：早期第 1 章硬编码 MVP，active，可做备份参考。

@@ -26,6 +26,7 @@ NVIDIA Corporation/
 
 # Large raw generation traces can be kept local unless explicitly needed
 novel_projects/**/runs/
+novel_reader_site/
 
 # OS / editor
 .DS_Store
