@@ -382,3 +382,48 @@ Reader Site Publish
 ```
 
 完成后再动 N8N。
+
+## 2026-05-02 执行结果
+
+已补齐第一本书当前 3 章测试项目的核心资产：
+
+```text
+novel_projects/v02_3ch_smoke_20260501_1935/bible/characters.json
+novel_projects/v02_3ch_smoke_20260501_1935/bible/institutional_plausibility.json
+novel_projects/v02_3ch_smoke_20260501_1935/bible/long_novel_architecture.json
+novel_projects/v02_3ch_smoke_20260501_1935/bible/reader_promise.json
+novel_projects/v02_3ch_smoke_20260501_1935/bible/style_bible.md
+novel_projects/v02_3ch_smoke_20260501_1935/outline/volumes.json
+```
+
+同时补齐长篇账本：
+
+```text
+memory/global_arc_ledger.json
+memory/plot_thread_ledger.json
+memory/relationship_ledger.json
+memory/protagonist_cost_ledger.json
+memory/motif_ledger.json
+```
+
+已新增并运行资产完整性审计：
+
+```powershell
+C:\Python311\python.exe .\novel_factory\scripts\audit_book_assets.py --book-id v02_3ch_smoke_20260501_1935 --write
+```
+
+审计结果：
+
+```text
+status: pass
+critical_count: 0
+warning_count: 0
+character_count: 6
+chapter_count_found: 3
+```
+
+报告位置：
+
+```text
+review/asset_completeness_report.json
+```

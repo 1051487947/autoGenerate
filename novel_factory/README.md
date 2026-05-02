@@ -120,6 +120,22 @@ N8N 不直接承载长 Prompt 和复杂设定，尽量只做这些事：
 
 每个模型节点的输出都要写入文件或数据库，避免失败后丢失上下文。
 
+## 资产完整性审计
+
+生成或补齐一本书的核心资产后，运行：
+
+```powershell
+C:\Python311\python.exe .\novel_factory\scripts\audit_book_assets.py --book-id v02_3ch_smoke_20260501_1935 --write
+```
+
+审计报告会写入：
+
+```text
+novel_projects/<book_id>/review/asset_completeness_report.json
+```
+
+该脚本会检查人物卡、制度可信度、长篇架构、分卷规划、文风圣经、读者承诺和长篇账本是否可用。
+
 ## 通过 HTTP Bridge 接入 N8N
 
 如果希望 N8N 通过 HTTP Request 节点读写小说工程，可以启动轻量 Bridge：

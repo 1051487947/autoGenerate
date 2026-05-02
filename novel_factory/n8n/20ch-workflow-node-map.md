@@ -100,6 +100,7 @@ Webhook / Manual Trigger
       -> Next Batch
   -> If Needs Repair
       -> Repair Outline / Manual Review
+  -> Asset Completeness Audit
   -> Finalize Full Book
   -> Archive Full Book
 ```
@@ -226,6 +227,7 @@ memory/hook_ledger.json
 
 ```text
 review/arc_continuity_report.json
+review/asset_completeness_report.json
 ```
 
 ### QA Gate

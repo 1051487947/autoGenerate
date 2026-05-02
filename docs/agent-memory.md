@@ -826,3 +826,21 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `沈妙` -> `彭凯茜`
 - 已同步更新相关说明文档中的当前称呼。
 - 旧名不再作为第一本书后续生成的标准人物名。
+
+## 2026-05-02 第一本书核心资产补齐
+
+- 用户去购买 Kimi 模型期间，继续处理第一本书不依赖 Kimi 的底层资产。
+- 已新增资产审计脚本：`novel_factory/scripts/audit_book_assets.py`。
+- 已补齐 `novel_projects/v02_3ch_smoke_20260501_1935`：
+  - `bible/characters.json`，包含 6 个核心人物：林井安、彭凯茜、许岩、马静、老周、高承岳。
+  - `bible/institutional_plausibility.json`，解释林井安如何被推成临时董事长。
+  - `bible/long_novel_architecture.json`，按 120 章、6 卷设计 30 万字长篇结构。
+  - `outline/volumes.json`，细化 6 卷阶段危机、人物错误、关系推进、阶段胜利和代价。
+  - `bible/reader_promise.json` 和 `bible/style_bible.md`。
+  - `memory/global_arc_ledger.json`、`plot_thread_ledger.json`、`relationship_ledger.json`、`protagonist_cost_ledger.json`、`motif_ledger.json`。
+- 已运行资产完整性审计：
+  - `status=pass`
+  - `critical_count=0`
+  - `warning_count=0`
+  - `character_count=6`
+  - `chapter_count_found=3`
