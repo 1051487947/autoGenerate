@@ -1,6 +1,8 @@
-# 20 章小说 N8N 节点映射
+# 小说 N8N 节点映射
 
 ## 主流程
+
+### 20章试写模式
 
 ```text
 Webhook / Manual Trigger
@@ -60,6 +62,48 @@ Webhook / Manual Trigger
   -> Archive Full Book
 ```
 
+### 30万字长篇模式
+
+```text
+Webhook / Manual Trigger
+  -> Init Book Params
+  -> Init Local Project
+  -> Load Prompt Templates
+  -> GPT Seed From Title
+  -> Validate Story Seed
+  -> Save Story Seed
+  -> GPT Story Bible
+  -> Save Story Bible
+  -> GPT Character Cards
+  -> Save Characters
+  -> GPT Golden Finger
+  -> Save Golden Finger
+  -> GPT Style Bible
+  -> Save Style Bible
+  -> GPT Voice Fingerprint
+  -> Save Voice Fingerprint
+  -> GPT Institutional Plausibility Patch
+  -> Save Institutional Plausibility
+  -> GPT Long Novel Architect
+  -> Save Long Novel Architecture
+  -> Split Volumes
+      -> GPT Volume Arc Planner
+      -> Save Volume Arc
+  -> Select Current Batch 20 Chapters
+  -> GPT Rolling Batch 20 Planner
+  -> Save Current Batch Outline
+  -> Split Chapters
+      -> Run Chapter Worker
+  -> GPT Arc Continuity Auditor
+  -> Save Arc Continuity Audit
+  -> If Can Continue
+      -> Next Batch
+  -> If Needs Repair
+      -> Repair Outline / Manual Review
+  -> Finalize Full Book
+  -> Archive Full Book
+```
+
 ## 关键数据字段
 
 ### Init Book Params
@@ -70,6 +114,24 @@ Webhook / Manual Trigger
   "title": "我要送快递可是你非要我做董事长",
   "chapter_count": 20,
   "target_words_per_chapter": 2500,
+  "style": "都市轻喜剧爽文",
+  "models": {
+    "logic": "gpt",
+    "writer": "kimi"
+  }
+}
+```
+
+30万字长篇建议：
+
+```json
+{
+  "book_id": "kuaidi_300k",
+  "title": "我要送快递可是你非要我做董事长",
+  "chapter_count": 120,
+  "target_total_words": 300000,
+  "target_words_per_chapter": 2500,
+  "batch_size": 20,
   "style": "都市轻喜剧爽文",
   "models": {
     "logic": "gpt",
@@ -103,6 +165,7 @@ Webhook / Manual Trigger
     "characters": {},
     "golden_finger": {},
     "institutional_plausibility": {},
+    "long_novel_architecture": {},
     "style_bible": "",
     "voice_fingerprint": {},
     "anti_ai_phrasebook": {},
@@ -119,9 +182,17 @@ Webhook / Manual Trigger
 bible/characters.json
 bible/golden_finger.json
 bible/institutional_plausibility.json
+bible/long_novel_architecture.json
 bible/style_bible.md
 bible/voice_fingerprint.json
 bible/anti_ai_phrasebook.zh.json
+```
+
+长篇大纲：
+
+```text
+outline/volumes.json
+outline/current_batch_outline.json
 ```
 
 章节级：
@@ -142,10 +213,19 @@ memory/foreshadow_ledger.json
 memory/character_arc_ledger.json
 memory/causality_ledger.json
 memory/golden_finger_ledger.json
+memory/global_arc_ledger.json
+memory/plot_thread_ledger.json
+memory/relationship_ledger.json
 memory/protagonist_cost_ledger.json
 memory/motif_ledger.json
 memory/editorial_feedback_ledger.json
 memory/hook_ledger.json
+```
+
+批次级审计：
+
+```text
+review/arc_continuity_report.json
 ```
 
 ### QA Gate

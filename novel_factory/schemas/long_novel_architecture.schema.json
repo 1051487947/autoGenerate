@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LongNovelArchitecture",
+  "type": "object",
+  "required": [
+    "book_title",
+    "target_total_words",
+    "target_chapter_count",
+    "core_premise",
+    "first_20_role",
+    "global_arc",
+    "volumes",
+    "protagonist_arc",
+    "relationship_strategy",
+    "antagonist_escalation",
+    "motif_strategy",
+    "secrets_reveal_policy",
+    "forbidden_longform_patterns"
+  ],
+  "properties": {
+    "book_title": { "type": "string" },
+    "target_total_words": { "type": "integer" },
+    "target_chapter_count": { "type": "integer" },
+    "core_premise": { "type": "string" },
+    "first_20_role": { "type": "string" },
+    "global_arc": { "type": "string" },
+    "volumes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["volume_index", "title", "chapter_start", "chapter_end", "core_conflict", "stage_win", "stage_cost", "ending_hook"],
+        "properties": {
+          "volume_index": { "type": "integer" },
+          "title": { "type": "string" },
+          "chapter_start": { "type": "integer" },
+          "chapter_end": { "type": "integer" },
+          "core_conflict": { "type": "string" },
+          "stage_win": { "type": "string" },
+          "stage_cost": { "type": "string" },
+          "ending_hook": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "protagonist_arc": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "relationship_strategy": { "type": "string" },
+    "antagonist_escalation": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "motif_strategy": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "secrets_reveal_policy": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "forbidden_longform_patterns": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

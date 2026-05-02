@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BatchOutline",
+  "type": "object",
+  "required": [
+    "book_title",
+    "batch_index",
+    "chapter_start",
+    "chapter_end",
+    "batch_goal",
+    "chapters"
+  ],
+  "properties": {
+    "book_title": { "type": "string" },
+    "batch_index": { "type": "integer" },
+    "chapter_start": { "type": "integer" },
+    "chapter_end": { "type": "integer" },
+    "batch_goal": { "type": "string" },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "chapter_index",
+          "chapter_title",
+          "event_goal",
+          "plot_thread",
+          "character_arc_step",
+          "relationship_arc_step",
+          "antagonist_action",
+          "protagonist_cost",
+          "foreshadow_action",
+          "cliffhanger_type"
+        ],
+        "properties": {
+          "chapter_index": { "type": "integer" },
+          "chapter_title": { "type": "string" },
+          "event_goal": { "type": "string" },
+          "plot_thread": { "type": "string" },
+          "character_arc_step": { "type": "string" },
+          "relationship_arc_step": { "type": "string" },
+          "antagonist_action": { "type": "string" },
+          "protagonist_cost": { "type": "string" },
+          "foreshadow_action": { "type": "string" },
+          "cliffhanger_type": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

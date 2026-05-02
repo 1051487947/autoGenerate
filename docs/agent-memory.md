@@ -762,3 +762,28 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `memory/motif_ledger.json`
   - `memory/editorial_feedback_ledger.json`
 - 已更新 `novel_factory/README.md` 和 `novel_factory/n8n/20ch-workflow-node-map.md`，补充 V0.3 节点位置和 QA Gate 建议。
+
+## 2026-05-02 小说工厂 V0.5 30万字长篇模式
+
+- 用户询问当前前 20 章是否可以放大为整体一本 30 万字小说。
+- 判断：可以，但 20 章应定位为第一卷/第一阶段，不应直接拉长成完整书。
+- 已新增文档：`docs/novel-v0.5-longform-300k-plan.md`。
+- 已新增 Prompt：
+  - `23_long_novel_architect.md`
+  - `24_volume_arc_planner.md`
+  - `25_rolling_batch_20_planner.md`
+  - `26_arc_continuity_auditor.md`
+- 已新增 Schema：
+  - `long_novel_architecture.schema.json`
+  - `volume_arc.schema.json`
+  - `batch_outline.schema.json`
+  - `arc_continuity_audit.schema.json`
+- 已更新 `init_book_project.py`，新书初始化会创建：
+  - `bible/long_novel_architecture.json`
+  - `outline/volumes.json`
+  - `outline/current_batch_outline.json`
+  - `memory/global_arc_ledger.json`
+  - `memory/plot_thread_ledger.json`
+  - `memory/relationship_ledger.json`
+  - `review/arc_continuity_report.json`
+- 推荐长篇流程：全书架构 -> 分卷弧线 -> 滚动 20 章批次 -> 单章生成 -> 批次连续性审计 -> 下一批。

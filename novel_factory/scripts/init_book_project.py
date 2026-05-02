@@ -84,6 +84,21 @@ def build_project(root: Path, title: str, book_id: str, chapter_count: int) -> P
         "chapter_injections": [],
         "forbidden_explanations": [],
     })
+    write_json(project_dir / "bible" / "long_novel_architecture.json", {
+        "book_title": title,
+        "target_total_words": 300000,
+        "target_chapter_count": chapter_count,
+        "core_premise": "",
+        "first_20_role": "",
+        "global_arc": "",
+        "volumes": [],
+        "protagonist_arc": [],
+        "relationship_strategy": "",
+        "antagonist_escalation": [],
+        "motif_strategy": [],
+        "secrets_reveal_policy": [],
+        "forbidden_longform_patterns": [],
+    })
     write_json(project_dir / "bible" / "foreshadowing.json", {"items": []})
     write_text(project_dir / "bible" / "style_bible.md", f"# {title} 文风圣经\n\n> 待由 `12_style_bible` 生成。\n")
     write_json(project_dir / "bible" / "voice_fingerprint.json", {
@@ -108,7 +123,12 @@ def build_project(root: Path, title: str, book_id: str, chapter_count: int) -> P
         "usage_note": "先用于审计和扣分，不做绝对禁用。",
     })
     write_json(project_dir / "outline" / "chapters_20.json", {"book_title": title, "chapter_count": chapter_count, "chapters": []})
+    write_json(project_dir / "outline" / "volumes.json", {"book_title": title, "volumes": []})
+    write_json(project_dir / "outline" / "current_batch_outline.json", {"book_title": title, "chapters": []})
     write_json(project_dir / "memory" / "chapter_summaries.json", {"chapters": []})
+    write_json(project_dir / "memory" / "global_arc_ledger.json", {"items": []})
+    write_json(project_dir / "memory" / "plot_thread_ledger.json", {"threads": []})
+    write_json(project_dir / "memory" / "relationship_ledger.json", {"relationships": []})
     write_json(project_dir / "memory" / "state_memory.json", {"characters": [], "locations": [], "organizations": [], "must_remember": []})
     write_json(project_dir / "memory" / "foreshadow_ledger.json", {"items": []})
     write_json(project_dir / "memory" / "character_arc_ledger.json", {"characters": []})
@@ -127,6 +147,7 @@ def build_project(root: Path, title: str, book_id: str, chapter_count: int) -> P
     write_json(project_dir / "review" / "style_report.json", {"chapters": []})
     write_json(project_dir / "review" / "logic_report.json", {"chapters": []})
     write_json(project_dir / "review" / "foreshadow_report.json", {"chapters": []})
+    write_json(project_dir / "review" / "arc_continuity_report.json", {"batches": []})
     write_text(project_dir / "export" / "full_book.md", f"# {title}\n\n")
 
     readme = f"""# {title}
@@ -142,9 +163,12 @@ book_id: `{book_id}`
 5. 用 `12_style_bible` 生成 `bible/style_bible.md`。
 6. 用 `13_voice_fingerprint` 生成 `bible/voice_fingerprint.json`。
 7. 用 `19_institutional_plausibility_patch` 生成 `bible/institutional_plausibility.json`。
-8. 用 `03_outline_20` 生成 `outline/chapters_20.json`。
-9. 可选：用 `18_editorial_diagnosis_from_feedback` 消化人工或外部 AI 评价，写入 `memory/editorial_feedback_ledger.json`。
-10. 按章节循环生成：
+8. 长篇模式：用 `23_long_novel_architect` 生成 `bible/long_novel_architecture.json`。
+9. 长篇模式：用 `24_volume_arc_planner` 生成 `outline/volumes.json`。
+10. 20章试写模式：用 `03_outline_20` 生成 `outline/chapters_20.json`。
+11. 长篇模式：用 `25_rolling_batch_20_planner` 生成当前批次 `outline/current_batch_outline.json`。
+12. 可选：用 `18_editorial_diagnosis_from_feedback` 消化人工或外部 AI 评价，写入 `memory/editorial_feedback_ledger.json`。
+13. 按章节循环生成：
    - `review/ch001.logic.json`
    - `review/ch001.foreshadow.json`
    - `review/ch001.antagonist.json`
@@ -157,28 +181,32 @@ book_id: `{book_id}`
    - `review/ch001.anti_ai.json`
    - `review/ch001.qa.json`
    - `memory/ch001.memory.json`
-11. 回写长期账本：
+14. 回写长期账本：
    - `memory/foreshadow_ledger.json`
    - `memory/character_arc_ledger.json`
    - `memory/causality_ledger.json`
+   - `memory/global_arc_ledger.json`
+   - `memory/plot_thread_ledger.json`
+   - `memory/relationship_ledger.json`
    - `memory/antagonist_move_ledger.json`
    - `memory/protagonist_cost_ledger.json`
    - `memory/motif_ledger.json`
-12. 最后合并到 `export/full_book.md`。
+15. 每个 20 章批次后，用 `26_arc_continuity_auditor` 生成 `review/arc_continuity_report.json`。
+16. 最后合并到 `export/full_book.md`。
 
 ## 当前状态
 
-项目骨架已初始化，等待 AI 工作流填充内容。V0.3 已包含人物卡、金手指、风格圣经、制度可信度补丁、编辑反馈诊断、反派反制、主角代价、核心隐喻和长期记忆账本占位。
+项目骨架已初始化，等待 AI 工作流填充内容。V0.5 已包含人物卡、金手指、风格圣经、制度可信度补丁、编辑反馈诊断、反派反制、主角代价、核心隐喻、30万字长篇架构、分卷弧线、滚动20章批次规划和长期记忆账本占位。
 """
     write_text(project_dir / "README.md", readme)
     return project_dir
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Initialize a 20 chapter AI novel project.")
+    parser = argparse.ArgumentParser(description="Initialize an AI novel project.")
     parser.add_argument("--title", required=True, help="Novel title.")
     parser.add_argument("--book-id", default=None, help="Optional stable book id.")
-    parser.add_argument("--chapter-count", type=int, default=20, help="Chapter count, default 20.")
+    parser.add_argument("--chapter-count", type=int, default=20, help="Chapter count, default 20. Use about 100-120 for a 300k-word novel.")
     args = parser.parse_args()
 
     repo_root = Path(__file__).resolve().parents[2]

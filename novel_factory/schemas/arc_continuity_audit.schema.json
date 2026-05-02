@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ArcContinuityAudit",
+  "type": "object",
+  "required": [
+    "batch_index",
+    "main_plot_alignment_score",
+    "character_arc_score",
+    "relationship_arc_score",
+    "antagonist_pressure_score",
+    "foreshadow_balance_score",
+    "repetition_risk",
+    "protagonist_smoothness_risk",
+    "issues",
+    "required_repairs",
+    "can_continue_next_batch"
+  ],
+  "properties": {
+    "batch_index": { "type": "integer" },
+    "main_plot_alignment_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "character_arc_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "relationship_arc_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "antagonist_pressure_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "foreshadow_balance_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "repetition_risk": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "protagonist_smoothness_risk": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "issues": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "required_repairs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "can_continue_next_batch": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

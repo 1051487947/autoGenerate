@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VolumeArc",
+  "type": "object",
+  "required": [
+    "volume_index",
+    "title",
+    "chapter_range",
+    "opening_state",
+    "core_crisis",
+    "antagonist_upgrade",
+    "protagonist_stage_error",
+    "relationship_progression",
+    "foreshadow_actions",
+    "midpoint_turn",
+    "climax",
+    "stage_win",
+    "stage_cost",
+    "next_volume_hook"
+  ],
+  "properties": {
+    "volume_index": { "type": "integer" },
+    "title": { "type": "string" },
+    "chapter_range": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "integer" },
+        "end": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    "opening_state": { "type": "string" },
+    "core_crisis": { "type": "string" },
+    "antagonist_upgrade": { "type": "string" },
+    "protagonist_stage_error": { "type": "string" },
+    "relationship_progression": { "type": "string" },
+    "foreshadow_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "midpoint_turn": { "type": "string" },
+    "climax": { "type": "string" },
+    "stage_win": { "type": "string" },
+    "stage_cost": { "type": "string" },
+    "next_volume_hook": { "type": "string" }
+  },
+  "additionalProperties": false
+}
