@@ -53,7 +53,7 @@ novel_projects/<book_id>/chapters
 - 签收隐喻。
 - 一线体感 vs PPT。
 - 万路达。
-- 陆小川、沈妙、许岩。
+- 林井安、彭凯茜、许岩。
 
 这些不应该进入通用 Prompt。
 

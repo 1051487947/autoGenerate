@@ -65,7 +65,7 @@ novel_projects/v02_3ch_smoke_20260501_1935
 
 外部评价认为前三章有较强潜力：
 
-- 陆小川人物立住。
+- 林井安人物立住。
 - 行业质感真实。
 - “签收”隐喻有文学价值。
 - 三章结构形成“质疑 -> 揭穿 -> 验证”的递进。
@@ -151,7 +151,7 @@ novel_factory/scripts/build_reader_site.py
 
 - 快递。
 - 董事长。
-- 陆小川。
+- 林井安。
 - 签收。
 - 一线体感 vs PPT。
 - 系统正常但现实爆仓。
@@ -185,7 +185,7 @@ review/asset_completeness_report.json
 
 ### P0：第一本书人物卡未真正落地
 
-当前男主陆小川在 `story_bible.md` 中有人设，但 `bible/characters.json` 为空。
+当前男主林井安在 `story_bible.md` 中有人设，但 `bible/characters.json` 为空。
 
 下一步必须先生成并保存：
 
@@ -195,8 +195,8 @@ bible/characters.json
 
 至少包含：
 
-- 陆小川。
-- 沈妙。
+- 林井安。
+- 彭凯茜。
 - 许岩。
 - 马静。
 - 老周。
@@ -246,7 +246,7 @@ memory/protagonist_cost_ledger.json
 memory/motif_ledger.json
 ```
 
-尤其是陆小川和沈妙的关系线，建议先定位为：
+尤其是林井安和彭凯茜的关系线，建议先定位为：
 
 ```text
 规则执行者 -> 有限协作 -> 事实同盟 -> 价值观靠近
@@ -347,7 +347,7 @@ Style Audit
 
 对比旧版：
 
-- 陆小川是否仍然立住。
+- 林井安是否仍然立住。
 - 高管是否更像真实权力动物。
 - 制度补丁是否自然埋入。
 - 主角是否有代价。

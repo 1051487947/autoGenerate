@@ -741,7 +741,7 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
 
 ## 2026-05-02 小说工厂 V0.3 编辑反馈闭环
 
-- 用户提供了外部 AI 对前三章的整体评价，核心优点是陆小川职业烙印、一线体感 vs PPT、递进式揭露和“签收”隐喻；核心问题是高管偏工具人、制度设定悬空、主角胜利过顺。
+- 用户提供了外部 AI 对前三章的整体评价，核心优点是林井安职业烙印、一线体感 vs PPT、递进式揭露和“签收”隐喻；核心问题是高管偏工具人、制度设定悬空、主角胜利过顺。
 - 结论：这类问题不能只靠“润色节点”解决，应把编辑反馈转成工作流可执行资产。
 - 已新增文档：`docs/novel-v0.3-editorial-feedback-loop.md`。
 - 已新增 Prompt：
@@ -800,7 +800,7 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `21_protagonist_cost_failure_planner.md`
   - `22_motif_reader_promise_planner.md`
   - `23_long_novel_architect.md`
-- 清理后运行时 Prompt 不再直接包含“快递、董事长、陆小川、签收、一线体感 vs PPT”等第一本书关键词。
+- 清理后运行时 Prompt 不再直接包含“快递、董事长、林井安、签收、一线体感 vs PPT”等第一本书关键词。
 - 后续建议新增 `project_profile.json` 或 `genre_contract.json`，把题材类型、读者期待、感情线强度、爽点类型、禁写方向等作为单书配置输入。
 
 ## 2026-05-02 第一本书优化路线图
@@ -817,3 +817,12 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - 补齐 `bible/long_novel_architecture.json`。
   - 补齐 `outline/volumes.json`。
   - 增加资产完整性审计，避免正文生成成功但人物卡、长篇架构、关系账本仍为空。
+
+## 2026-05-02 第一本书主角命名调整
+
+- 用户确认第一本书男主角正式名为“林井安”，女主角正式名为“彭凯茜”。
+- 已将当前 3 章测试项目 `novel_projects/v02_3ch_smoke_20260501_1935` 中的旧名替换：
+  - `陆小川` -> `林井安`
+  - `沈妙` -> `彭凯茜`
+- 已同步更新相关说明文档中的当前称呼。
+- 旧名不再作为第一本书后续生成的标准人物名。
