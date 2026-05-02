@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MotifPlan",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "dominant_motif",
+    "motif_function",
+    "motif_echoes",
+    "industry_actions",
+    "reader_promise_payoff",
+    "new_reader_question",
+    "stale_repetition_risks",
+    "forbidden_direct_statements"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "dominant_motif": { "type": "string" },
+    "motif_function": { "type": "string" },
+    "motif_echoes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "industry_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "reader_promise_payoff": { "type": "string" },
+    "new_reader_question": { "type": "string" },
+    "stale_repetition_risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "forbidden_direct_statements": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InstitutionalPlausibility",
+  "type": "object",
+  "required": [
+    "central_premise",
+    "plausibility_gap",
+    "legal_or_governance_mechanism",
+    "authorization_chain",
+    "documents_to_seed",
+    "people_who_know_truth",
+    "people_who_exploit_gap",
+    "reveal_schedule",
+    "chapter_injections",
+    "forbidden_explanations"
+  ],
+  "properties": {
+    "central_premise": { "type": "string" },
+    "plausibility_gap": { "type": "string" },
+    "legal_or_governance_mechanism": { "type": "string" },
+    "authorization_chain": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "documents_to_seed": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "people_who_know_truth": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "people_who_exploit_gap": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "reveal_schedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["chapter_index", "reveal"],
+        "properties": {
+          "chapter_index": { "type": "integer" },
+          "reveal": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "chapter_injections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["chapter_index", "injection"],
+        "properties": {
+          "chapter_index": { "type": "integer" },
+          "injection": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "forbidden_explanations": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

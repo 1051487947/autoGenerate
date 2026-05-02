@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProtagonistCostPlan",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "intended_win",
+    "required_misjudgment",
+    "competence_boundary",
+    "material_cost",
+    "relationship_cost",
+    "reputation_or_authority_cost",
+    "irreversible_tradeoff",
+    "recovery_seed",
+    "forbidden_easy_wins"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "intended_win": { "type": "string" },
+    "required_misjudgment": { "type": "string" },
+    "competence_boundary": { "type": "string" },
+    "material_cost": { "type": "string" },
+    "relationship_cost": { "type": "string" },
+    "reputation_or_authority_cost": { "type": "string" },
+    "irreversible_tradeoff": { "type": "string" },
+    "recovery_seed": { "type": "string" },
+    "forbidden_easy_wins": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

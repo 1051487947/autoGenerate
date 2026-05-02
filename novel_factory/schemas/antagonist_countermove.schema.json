@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AntagonistCountermove",
+  "type": "object",
+  "required": [
+    "chapter_index",
+    "primary_antagonist",
+    "interest_at_stake",
+    "countermoves",
+    "information_wall",
+    "trap_for_protagonist",
+    "protagonist_misled_point",
+    "cost_if_protagonist_pushes",
+    "trace_left_behind",
+    "followup_pressure"
+  ],
+  "properties": {
+    "chapter_index": { "type": "integer" },
+    "primary_antagonist": { "type": "string" },
+    "interest_at_stake": { "type": "string" },
+    "countermoves": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "information_wall": { "type": "string" },
+    "trap_for_protagonist": { "type": "string" },
+    "protagonist_misled_point": { "type": "string" },
+    "cost_if_protagonist_pushes": { "type": "string" },
+    "trace_left_behind": { "type": "string" },
+    "followup_pressure": { "type": "string" }
+  },
+  "additionalProperties": false
+}

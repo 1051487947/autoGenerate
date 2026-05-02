@@ -72,6 +72,18 @@ def build_project(root: Path, title: str, book_id: str, chapter_count: int) -> P
         "must_deliver_every_chapter": [],
         "must_not_break": [],
     })
+    write_json(project_dir / "bible" / "institutional_plausibility.json", {
+        "central_premise": "",
+        "plausibility_gap": "",
+        "legal_or_governance_mechanism": "",
+        "authorization_chain": [],
+        "documents_to_seed": [],
+        "people_who_know_truth": [],
+        "people_who_exploit_gap": [],
+        "reveal_schedule": [],
+        "chapter_injections": [],
+        "forbidden_explanations": [],
+    })
     write_json(project_dir / "bible" / "foreshadowing.json", {"items": []})
     write_text(project_dir / "bible" / "style_bible.md", f"# {title} 文风圣经\n\n> 待由 `12_style_bible` 生成。\n")
     write_json(project_dir / "bible" / "voice_fingerprint.json", {
@@ -105,6 +117,9 @@ def build_project(root: Path, title: str, book_id: str, chapter_count: int) -> P
     write_json(project_dir / "memory" / "pressure_ledger.json", {"items": []})
     write_json(project_dir / "memory" / "knowledge_state_ledger.json", {"items": []})
     write_json(project_dir / "memory" / "antagonist_move_ledger.json", {"moves": []})
+    write_json(project_dir / "memory" / "protagonist_cost_ledger.json", {"items": []})
+    write_json(project_dir / "memory" / "motif_ledger.json", {"items": []})
+    write_json(project_dir / "memory" / "editorial_feedback_ledger.json", {"diagnoses": []})
     write_json(project_dir / "memory" / "hook_ledger.json", {"items": []})
     write_text(project_dir / "memory" / "continuity_notes.md", "# 连续性记录\n\n")
     write_json(project_dir / "review" / "qa_report.json", {"chapters": []})
@@ -126,10 +141,15 @@ book_id: `{book_id}`
 4. 用 `11_golden_finger` 生成 `bible/golden_finger.json`。
 5. 用 `12_style_bible` 生成 `bible/style_bible.md`。
 6. 用 `13_voice_fingerprint` 生成 `bible/voice_fingerprint.json`。
-7. 用 `03_outline_20` 生成 `outline/chapters_20.json`。
-8. 按章节循环生成：
+7. 用 `19_institutional_plausibility_patch` 生成 `bible/institutional_plausibility.json`。
+8. 用 `03_outline_20` 生成 `outline/chapters_20.json`。
+9. 可选：用 `18_editorial_diagnosis_from_feedback` 消化人工或外部 AI 评价，写入 `memory/editorial_feedback_ledger.json`。
+10. 按章节循环生成：
    - `review/ch001.logic.json`
    - `review/ch001.foreshadow.json`
+   - `review/ch001.antagonist.json`
+   - `review/ch001.cost.json`
+   - `review/ch001.motif.json`
    - `chapter_tasks/ch001.task.json`
    - `scenes/ch001.scenes.json`
    - `scenes/ch001_scene01.md`
@@ -137,15 +157,18 @@ book_id: `{book_id}`
    - `review/ch001.anti_ai.json`
    - `review/ch001.qa.json`
    - `memory/ch001.memory.json`
-9. 回写长期账本：
+11. 回写长期账本：
    - `memory/foreshadow_ledger.json`
    - `memory/character_arc_ledger.json`
    - `memory/causality_ledger.json`
-10. 最后合并到 `export/full_book.md`。
+   - `memory/antagonist_move_ledger.json`
+   - `memory/protagonist_cost_ledger.json`
+   - `memory/motif_ledger.json`
+12. 最后合并到 `export/full_book.md`。
 
 ## 当前状态
 
-项目骨架已初始化，等待 AI 工作流填充内容。V0.2 已包含人物卡、金手指、风格圣经、反 AI 词表和长期记忆账本占位。
+项目骨架已初始化，等待 AI 工作流填充内容。V0.3 已包含人物卡、金手指、风格圣经、制度可信度补丁、编辑反馈诊断、反派反制、主角代价、核心隐喻和长期记忆账本占位。
 """
     write_text(project_dir / "README.md", readme)
     return project_dir

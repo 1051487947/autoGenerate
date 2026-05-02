@@ -20,15 +20,25 @@ Webhook / Manual Trigger
   -> Save Style Bible
   -> GPT Voice Fingerprint
   -> Save Voice Fingerprint
+  -> GPT Institutional Plausibility Patch
+  -> Save Institutional Plausibility
   -> GPT Outline 20
   -> Validate Outline
   -> Save Outline
+  -> Optional Editorial Diagnosis From Feedback
+  -> Save Editorial Diagnosis
   -> Split Chapters
       -> Build Chapter Context
       -> GPT Logic Causality Planner
       -> Save Logic Plan
       -> GPT Foreshadow Planner
       -> Save Foreshadow Plan
+      -> GPT Antagonist Countermove Planner
+      -> Save Antagonist Countermove
+      -> GPT Protagonist Cost Failure Planner
+      -> Save Cost Plan
+      -> GPT Motif Reader Promise Planner
+      -> Save Motif Plan
       -> GPT Chapter Task
       -> GPT Scene Cards
       -> Split Scenes
@@ -92,9 +102,11 @@ Webhook / Manual Trigger
   "bible_assets": {
     "characters": {},
     "golden_finger": {},
+    "institutional_plausibility": {},
     "style_bible": "",
     "voice_fingerprint": {},
-    "anti_ai_phrasebook": {}
+    "anti_ai_phrasebook": {},
+    "reader_promise": {}
   }
 }
 ```
@@ -106,6 +118,7 @@ Webhook / Manual Trigger
 ```text
 bible/characters.json
 bible/golden_finger.json
+bible/institutional_plausibility.json
 bible/style_bible.md
 bible/voice_fingerprint.json
 bible/anti_ai_phrasebook.zh.json
@@ -116,6 +129,9 @@ bible/anti_ai_phrasebook.zh.json
 ```text
 review/ch001.logic.json
 review/ch001.foreshadow.json
+review/ch001.antagonist.json
+review/ch001.cost.json
+review/ch001.motif.json
 review/ch001.anti_ai.json
 ```
 
@@ -126,6 +142,9 @@ memory/foreshadow_ledger.json
 memory/character_arc_ledger.json
 memory/causality_ledger.json
 memory/golden_finger_ledger.json
+memory/protagonist_cost_ledger.json
+memory/motif_ledger.json
+memory/editorial_feedback_ledger.json
 memory/hook_ledger.json
 ```
 
@@ -137,6 +156,10 @@ memory/hook_ledger.json
 - `70 <= total_score < 80`：自动修订一次。
 - `total_score < 70`：整章重写。
 - `major_conflict = true`：暂停人工确认。
+- `logic_ai_risk > 45`：定向重写。
+- 最近 3 章主角都无明显误判或代价：强制进入 `Protagonist Cost Failure Planner` 重排。
+- 本章对手无主动反制动作：回退到 `Antagonist Countermove Planner`。
+- 制度强设定被角色直接质疑但无补丁：暂停人工确认。
 
 ## 文件保存建议
 
@@ -149,6 +172,9 @@ scenes/ch001_scene01.md
 chapters/ch001.md
 review/ch001.logic.json
 review/ch001.foreshadow.json
+review/ch001.antagonist.json
+review/ch001.cost.json
+review/ch001.motif.json
 review/ch001.anti_ai.json
 review/ch001.style.json
 review/ch001.qa.json

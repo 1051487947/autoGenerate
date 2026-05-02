@@ -738,3 +738,27 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
     - `Novel Single Chapter Worker`：单章子流程，inactive 但可被主流程调用。
   - 标题到 20 章的主链路：标题 -> 故事种子 -> 小说圣经 -> 20 章大纲 -> 逐章 Worker -> 场景正文 -> 合章 -> QA -> 记忆回写 -> 合订本。
   - 当前限制和下一阶段建议：QA 归一化、自动精修、合订本节点化、Kimi 接入、记忆系统增强、人工审核节点。
+
+## 2026-05-02 小说工厂 V0.3 编辑反馈闭环
+
+- 用户提供了外部 AI 对前三章的整体评价，核心优点是陆小川职业烙印、一线体感 vs PPT、递进式揭露和“签收”隐喻；核心问题是高管偏工具人、制度设定悬空、主角胜利过顺。
+- 结论：这类问题不能只靠“润色节点”解决，应把编辑反馈转成工作流可执行资产。
+- 已新增文档：`docs/novel-v0.3-editorial-feedback-loop.md`。
+- 已新增 Prompt：
+  - `18_editorial_diagnosis_from_feedback.md`
+  - `19_institutional_plausibility_patch.md`
+  - `20_antagonist_countermove_planner.md`
+  - `21_protagonist_cost_failure_planner.md`
+  - `22_motif_reader_promise_planner.md`
+- 已新增 Schema：
+  - `editorial_diagnosis.schema.json`
+  - `institutional_plausibility.schema.json`
+  - `antagonist_countermove.schema.json`
+  - `protagonist_cost_plan.schema.json`
+  - `motif_plan.schema.json`
+- 已更新 `init_book_project.py`，新书初始化会创建：
+  - `bible/institutional_plausibility.json`
+  - `memory/protagonist_cost_ledger.json`
+  - `memory/motif_ledger.json`
+  - `memory/editorial_feedback_ledger.json`
+- 已更新 `novel_factory/README.md` 和 `novel_factory/n8n/20ch-workflow-node-map.md`，补充 V0.3 节点位置和 QA Gate 建议。

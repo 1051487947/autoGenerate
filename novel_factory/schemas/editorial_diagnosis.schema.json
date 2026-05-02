@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EditorialDiagnosis",
+  "type": "object",
+  "required": [
+    "book_id",
+    "covered_chapters",
+    "strengths_to_preserve",
+    "architecture_risks",
+    "chapter_level_risks",
+    "character_targets",
+    "workflow_changes",
+    "qa_gate_updates",
+    "ledger_updates"
+  ],
+  "properties": {
+    "book_id": { "type": "string" },
+    "covered_chapters": {
+      "type": "array",
+      "items": { "type": "integer" }
+    },
+    "strengths_to_preserve": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "architecture_risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "chapter_level_risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "character_targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["character_name", "current_issue", "required_enrichment"],
+        "properties": {
+          "character_name": { "type": "string" },
+          "current_issue": { "type": "string" },
+          "required_enrichment": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "workflow_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stage", "change", "reason"],
+        "properties": {
+          "stage": { "type": "string" },
+          "change": { "type": "string" },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "qa_gate_updates": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "ledger_updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ledger_path", "update_goal"],
+        "properties": {
+          "ledger_path": { "type": "string" },
+          "update_goal": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
