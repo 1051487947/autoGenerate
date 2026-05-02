@@ -787,3 +787,18 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `memory/relationship_ledger.json`
   - `review/arc_continuity_report.json`
 - 推荐长篇流程：全书架构 -> 分卷弧线 -> 滚动 20 章批次 -> 单章生成 -> 批次连续性审计 -> 下一批。
+
+## 2026-05-02 小说工厂抽象程度评估
+
+- 用户询问当前第一本书抽象是否足够，第二本书是否需要推翻重来。
+- 检查结论：工厂层不用推翻，但部分运行时 Prompt 残留第一本书题材硬编码。
+- 已新增文档：`docs/novel-factory-abstraction-review.md`。
+- 已清理以下 Prompt 中的题材硬编码：
+  - `06_writer_kimi_scene.md`
+  - `18_editorial_diagnosis_from_feedback.md`
+  - `19_institutional_plausibility_patch.md`
+  - `21_protagonist_cost_failure_planner.md`
+  - `22_motif_reader_promise_planner.md`
+  - `23_long_novel_architect.md`
+- 清理后运行时 Prompt 不再直接包含“快递、董事长、陆小川、签收、一线体感 vs PPT”等第一本书关键词。
+- 后续建议新增 `project_profile.json` 或 `genre_contract.json`，把题材类型、读者期待、感情线强度、爽点类型、禁写方向等作为单书配置输入。
