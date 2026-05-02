@@ -802,3 +802,18 @@ plink.exe -ssh root@8.140.56.75 -P 22 -pw '<password>' -batch 'curl -sS http://1
   - `23_long_novel_architect.md`
 - 清理后运行时 Prompt 不再直接包含“快递、董事长、陆小川、签收、一线体感 vs PPT”等第一本书关键词。
 - 后续建议新增 `project_profile.json` 或 `genre_contract.json`，把题材类型、读者期待、感情线强度、爽点类型、禁写方向等作为单书配置输入。
+
+## 2026-05-02 第一本书优化路线图
+
+- 用户要求整理从昨天到现在做了哪些优化、还需要做哪些优化、接下来如何继续推进。
+- 已新增文档：`docs/first-book-optimization-roadmap-20260502.md`。
+- 核心判断：
+  - 第一本书已经从“能否生成”进入“能否稳定写成长篇”的阶段。
+  - 当前 20 章应作为第一卷/第一阶段，不应直接当完整书。
+  - 近期不要急着写第 21 章，应先补齐第一本书核心资产。
+- 近期最小闭环：
+  - 补齐 `bible/characters.json`。
+  - 补齐 `bible/institutional_plausibility.json`。
+  - 补齐 `bible/long_novel_architecture.json`。
+  - 补齐 `outline/volumes.json`。
+  - 增加资产完整性审计，避免正文生成成功但人物卡、长篇架构、关系账本仍为空。
